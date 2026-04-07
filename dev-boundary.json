@@ -1,0 +1,29 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowedServices",
+      "Effect": "Allow",
+      "Action": [
+        "s3:*",
+        "ec2:Describe*",
+        "sts:AssumeRole",
+        "cloudwatch:GetMetricData",
+        "logs:Describe*",
+        "logs:Get*"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "DenyPrivilegedServices",
+      "Effect": "Deny",
+      "Action": [
+        "iam:*",
+        "organizations:*",
+        "account:*",
+        "budgets:*"
+      ],
+      "Resource": "*"
+    }
+  ]
+}

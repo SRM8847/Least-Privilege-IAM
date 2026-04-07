@@ -1,0 +1,29 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "S3ListAll",
+      "Effect": "Allow",
+      "Action": ["s3:ListAllMyBuckets", "s3:GetBucketLocation"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "S3DevBucketAccess",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject", "s3:PutObject",
+        "s3:DeleteObject", "s3:ListBucket"
+      ],
+      "Resource": [
+        "arn:aws:s3:::dev-bucket-$ACCOUNT_ID",
+        "arn:aws:s3:::dev-bucket-$ACCOUNT_ID/*"
+      ]
+    },
+    {
+      "Sid": "DenyBilling",
+      "Effect": "Deny",
+      "Action": ["aws-portal:*", "budgets:*", "ce:*"],
+      "Resource": "*"
+    }
+  ]
+}
