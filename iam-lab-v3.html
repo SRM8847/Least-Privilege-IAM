@@ -697,7 +697,7 @@
   <div class="lab-header">
     <div class="breadcrumb">AWS Cloud Security Projects → <span>Project 01 — v2</span></div>
     <h1>Least Privilege IAM Lab</h1>
-    <p class="subtitle">Complete corrected edition — v3. Three groups, three distinct access patterns — direct RBAC, forced role assumption, and STS session policy narrowing. Developer group uses standing permissions only; role assumption is reserved for ops and readonly patterns. All bugs from v1 fixed, testing gaps filled.</p>
+    <p class="subtitle">Complete corrected edition — v3. Three groups, three distinct access patterns — direct RBAC, forced role assumption, and STS session policy narrowing. Developer group uses standing permissions only; role assumption is reserved for ops and readonly patterns. All bugs fixed, testing gaps filled.</p>
     <div class="meta-row">
       <span class="badge badge-amber">BEGINNER</span>
       <span class="badge badge-blue">IAM</span>
@@ -819,7 +819,7 @@
 
   <!-- ── WHAT CHANGED ── -->
   <section id="changes">
-    <h2><span class="section-num">02</span> What Changed From v1</h2>
+    <h2><span class="section-num">02</span> What Changed</h2>
     <p>Twelve bugs fixed, four improvements added. Each <span style="color:var(--red);font-family:var(--mono);font-size:12px">fix</span> tag in the sidebar marks an affected section.</p>
 
     <div class="matrix matrix-3">
@@ -835,7 +835,7 @@
       </div>
       <div class="matrix-row">
         <div class="matrix-cell">02</div>
-        <div class="matrix-cell">alice had no sts:AssumeRole permission for dev-s3-role (v1 → v2 fix)</div>
+        <div class="matrix-cell">alice had no sts:AssumeRole permission for dev-s3-role</div>
         <div class="matrix-cell">Superseded in v3 — assume-role removed from developers entirely. See entry #13</div>
       </div>
       <div class="matrix-row">
@@ -968,8 +968,8 @@
     </div>
 
     <div class="errata">
-      <span class="errata-label">v1 bug</span>
-      <span>v1 created roles in Phase 6 but inline policies in Phase 3 already referenced role ARNs. Fixed by creating roles first. ARNs are deterministic so the policies could be written without the roles existing, but creating roles first is clearer and avoids confusion when verifying.</span>
+      <span class="errata-label">bug</span>
+      <span>Roles were originally created later in the lab but inline policies already referenced role ARNs. Fixed by creating roles first. ARNs are deterministic so the policies could be written without the roles existing, but creating roles first is clearer and avoids confusion when verifying.</span>
     </div>
 
     <p>Each role needs two things: a trust policy (who can assume it) and permissions (what they can do after assuming). Trust policies are set at role creation time — permissions are attached after. The <code>developers</code> group uses direct managed policy permissions only, so no role is created for alice.</p>
@@ -1252,8 +1252,8 @@ EOF
     </div>
 
     <div class="errata">
-      <span class="errata-label">v1 bug</span>
-      <span>v1 configured profiles with aws configure --profile alice but never set the region. If the shell's default region differs from us-east-1, EC2 and S3 calls land in the wrong region and fail for the wrong reason. Region is now set explicitly per profile.</span>
+      <span class="errata-label">bug</span>
+      <span>Profiles were configured with aws configure --profile but the region was never set. If the shell's default region differs from us-east-1, EC2 and S3 calls land in the wrong region and fail for the wrong reason. Region is now set explicitly per profile.</span>
     </div>
 
     <div class="code-block">
@@ -1405,7 +1405,7 @@ EOF
       </div>
     </div>
 
-    <p>v1 referenced <code>dev-bucket</code> throughout all policy documents and simulation tests but never created it. This made alice's live credential test impossible. This phase creates both test buckets: the dev-bucket alice should access, and an other-bucket she should not.</p>
+    <p><code>dev-bucket</code> was referenced throughout all policy documents and simulation tests but never created. This made alice's live credential test impossible. This phase creates both test buckets: the dev-bucket alice should access, and an other-bucket she should not.</p>
 
     <div class="code-block">
       <div class="code-header">
@@ -1548,8 +1548,8 @@ EOF
     <p>Simulation validates that the policy documents are logically correct. It tests the IAM evaluation engine without making real API calls to services. Run this first — if simulation results are wrong, fix the policy before testing with live credentials.</p>
 
     <div class="errata">
-      <span class="errata-label">v1 bug</span>
-      <span>v1 simulation used --resource-arns "*" for resource-scoped actions, which gives imprecise results. All simulations now use correct ARN formats. v1 also never tested alice against other-bucket to verify resource scoping. Both are fixed here.</span>
+      <span class="errata-label">bug</span>
+      <span>Simulation previously used --resource-arns "*" for resource-scoped actions, which gives imprecise results. All simulations now use correct ARN formats. Tests against other-bucket were also absent to verify resource scoping. Both are fixed here.</span>
     </div>
 
     <div class="code-block">
@@ -1597,7 +1597,7 @@ EOF
   <section id="test2">
     <h2><span class="section-num">T2</span> alice Live Credential Test <span class="fix-badge">new</span></h2>
 
-    <p>Simulation confirmed the policy is logically correct. Now confirm that alice's actual credentials enforce the same boundaries at runtime against real resources. This is the test that was completely absent in v1.</p>
+    <p>Simulation confirmed the policy is logically correct. Now confirm that alice's actual credentials enforce the same boundaries at runtime against real resources. This is the test that was previously absent.</p>
 
     <div class="code-block">
       <div class="code-header">
@@ -1646,7 +1646,7 @@ EOF
 
     <div class="callout warning">
       <div class="callout-title">Why budgets:* instead of ce:GetCostAndUsage</div>
-      <p>v1 used <code>aws ce get-cost-and-usage</code> to test billing denial. The problem: Cost Explorer must be enabled separately in the AWS account under Billing preferences. If it's not enabled, the API returns a service error (not an IAM AccessDenied), which looks like the test failed for the wrong reason. <code>budgets:describe-budgets</code> is part of the same DenyBilling statement and does not need explicit service enablement.</p>
+      <p>The original approach used <code>aws ce get-cost-and-usage</code> to test billing denial. The problem: Cost Explorer must be enabled separately in the AWS account under Billing preferences. If it's not enabled, the API returns a service error (not an IAM AccessDenied), which looks like the test failed for the wrong reason. <code>budgets:describe-budgets</code> is part of the same DenyBilling statement and does not need explicit service enablement.</p>
     </div>
   </section>
 
@@ -1659,8 +1659,8 @@ EOF
     <p>The key demonstration for the ops-team pattern. Bob is denied at every AWS service call until he assumes the role. Then EC2 describe works. Destructive EC2 actions remain denied via the explicit deny in the role's inline policy.</p>
 
     <div class="errata">
-      <span class="errata-label">v1 bug</span>
-      <span>v1 used i-fake123 as the test instance ID. EC2 validates instance ID format before calling IAM — i-fake123 fails format validation (InvalidInstanceID.Malformed) before IAM evaluates the policy, so the test returned the wrong error. Fixed: i-1234567890abcdef0 is a valid format. EC2 will return InvalidInstanceID.NotFound (the instance doesn't exist in your account), but that error comes after IAM evaluation — you're testing IAM, not EC2 inventory.</span>
+      <span class="errata-label">bug</span>
+      <span>The test instance ID was previously i-fake123. EC2 validates instance ID format before calling IAM — i-fake123 fails format validation (InvalidInstanceID.Malformed) before IAM evaluates the policy, so the test returned the wrong error. Fixed: i-1234567890abcdef0 is a valid format. EC2 will return InvalidInstanceID.NotFound (the instance doesn't exist in your account), but that error comes after IAM evaluation — you're testing IAM, not EC2 inventory.</span>
     </div>
 
     <div class="code-block">
@@ -1797,8 +1797,8 @@ EOF
     <p>Simulate a misconfiguration: someone accidentally attaches <code>AdministratorAccess</code> directly to alice. The permission boundary should make this a non-event — alice still cannot call IAM actions.</p>
 
     <div class="errata">
-      <span class="errata-label">v1 bug</span>
-      <span>v1 ran only simulation for this test and immediately cleaned up, giving no chance to verify the boundary works with live credentials. This version adds a live call after simulation to confirm the runtime enforcement matches the predicted simulation result.</span>
+      <span class="errata-label">bug</span>
+      <span>This test previously ran only simulation and immediately cleaned up, giving no chance to verify the boundary works with live credentials. A live call is now added after simulation to confirm the runtime enforcement matches the predicted simulation result.</span>
     </div>
 
     <div class="code-block">
@@ -1857,8 +1857,8 @@ EOF
     <h2><span class="section-num">T8</span> CloudTrail Audit <span class="fix-badge">timing fix</span></h2>
 
     <div class="errata">
-      <span class="errata-label">v1 bug</span>
-      <span>v1 said "wait ~5 minutes." CloudTrail's lookup-events API shows events within 15 minutes of occurrence for management events. Plan for up to 15 minutes. The S3-based log files take even longer and require manual download to parse.</span>
+      <span class="errata-label">bug</span>
+      <span>The original version said "wait ~5 minutes." CloudTrail's lookup-events API shows events within 15 minutes of occurrence for management events. Plan for up to 15 minutes. The S3-based log files take even longer and require manual download to parse.</span>
     </div>
 
     <div class="code-block">
