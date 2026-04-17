@@ -1,0 +1,2080 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project 1 — Least Privilege IAM Lab v3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0d0f12;
+    --bg2:       #141720;
+    --bg3:       #1c2030;
+    --bg4:       #232840;
+    --border:    #2a2f45;
+    --border2:   #363d5a;
+    --text:      #c8cde0;
+    --text2:     #7c85a8;
+    --text3:     #4a5270;
+    --accent:    #5b8dee;
+    --accent2:   #3d6fd4;
+    --green:     #3ecf8e;
+    --green2:    #1e7a54;
+    --green-bg:  #0d2018;
+    --amber:     #f5a623;
+    --amber-bg:  #1e1508;
+    --red:       #e05c5c;
+    --red-bg:    #1e0d0d;
+    --purple:    #9b7aea;
+    --purple-bg: #16112a;
+    --teal:      #38bdf8;
+    --teal-bg:   #0a1e2a;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.7;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ── Sidebar ── */
+  nav {
+    width: 248px;
+    min-width: 248px;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    padding: 24px 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+
+  .nav-logo {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+
+  .nav-logo .project-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .nav-logo h1 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #e2e6f0;
+    line-height: 1.3;
+  }
+
+  .nav-section-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text3);
+    padding: 12px 20px 4px;
+  }
+
+  nav a {
+    display: block;
+    padding: 5px 20px;
+    color: var(--text2);
+    text-decoration: none;
+    font-size: 12.5px;
+    transition: color 0.15s, background 0.15s;
+    border-left: 2px solid transparent;
+  }
+
+  nav a:hover { color: var(--text); background: var(--bg3); }
+  nav a.active { color: var(--accent); border-left-color: var(--accent); background: rgba(91,141,238,0.06); }
+
+  nav a .phase-num { font-family: var(--mono); font-size: 10px; color: var(--text3); margin-right: 6px; }
+
+  .nav-divider { height: 1px; background: var(--border); margin: 10px 20px; }
+
+  .fix-badge {
+    font-family: var(--mono);
+    font-size: 8px;
+    background: rgba(224,92,92,0.15);
+    color: var(--red);
+    border: 1px solid rgba(224,92,92,0.3);
+    border-radius: 2px;
+    padding: 1px 4px;
+    margin-left: 4px;
+    letter-spacing: 0.05em;
+    vertical-align: middle;
+  }
+
+  /* ── Main ── */
+  main {
+    flex: 1;
+    max-width: 880px;
+    padding: 48px 56px;
+    overflow-x: hidden;
+  }
+
+  /* ── Header ── */
+  .lab-header {
+    margin-bottom: 48px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .lab-header .breadcrumb {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text3);
+    margin-bottom: 16px;
+    letter-spacing: 0.05em;
+  }
+
+  .lab-header .breadcrumb span { color: var(--accent); }
+
+  .lab-header h1 {
+    font-size: 28px;
+    font-weight: 600;
+    color: #e8ecf8;
+    line-height: 1.2;
+    margin-bottom: 10px;
+    letter-spacing: -0.02em;
+  }
+
+  .lab-header .subtitle {
+    color: var(--text2);
+    font-size: 14px;
+    margin-bottom: 20px;
+    font-weight: 300;
+  }
+
+  .meta-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 3px 9px;
+    border-radius: 3px;
+    letter-spacing: 0.06em;
+    font-weight: 500;
+  }
+
+  .badge-blue   { background: rgba(91,141,238,0.12); color: var(--accent);  border: 1px solid rgba(91,141,238,0.25); }
+  .badge-green  { background: var(--green-bg);        color: var(--green);   border: 1px solid var(--green2); }
+  .badge-amber  { background: var(--amber-bg);        color: var(--amber);   border: 1px solid #5a3a08; }
+  .badge-purple { background: var(--purple-bg);       color: var(--purple);  border: 1px solid #4a3680; }
+  .badge-teal   { background: var(--teal-bg);         color: var(--teal);    border: 1px solid #1a4a6a; }
+  .badge-red    { background: var(--red-bg);          color: var(--red);     border: 1px solid #5a1a1a; }
+
+  /* ── Sections ── */
+  section { margin-bottom: 56px; scroll-margin-top: 32px; }
+
+  section h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #e2e6f0;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    letter-spacing: -0.01em;
+  }
+
+  section h2 .section-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(91,141,238,0.1);
+    border: 1px solid rgba(91,141,238,0.2);
+    padding: 2px 7px;
+    border-radius: 3px;
+    min-width: 36px;
+    text-align: center;
+  }
+
+  section h3 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #b0b8d4;
+    margin: 28px 0 10px;
+    font-family: var(--mono);
+    letter-spacing: 0.04em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    scroll-margin-top: 32px;
+  }
+
+  section h3::before {
+    content: '';
+    display: block;
+    width: 3px;
+    height: 12px;
+    background: var(--accent);
+    border-radius: 2px;
+    opacity: 0.6;
+  }
+
+  p { color: var(--text); margin-bottom: 12px; font-size: 13.5px; }
+
+  /* ── Matrix ── */
+  .matrix {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 16px 0;
+    font-size: 12.5px;
+  }
+
+  .matrix-header {
+    display: grid;
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .matrix-row {
+    display: grid;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .matrix-row:last-child { border-bottom: none; }
+
+  .matrix-cell {
+    padding: 10px 14px;
+    border-right: 1px solid var(--border);
+    color: var(--text2);
+  }
+
+  .matrix-cell:last-child { border-right: none; }
+
+  .matrix-header .matrix-cell {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text3);
+    font-weight: 500;
+  }
+
+  .matrix-4 .matrix-header,
+  .matrix-4 .matrix-row { grid-template-columns: 1.2fr 1.4fr 1.4fr 1.8fr; }
+
+  .matrix-3 .matrix-header,
+  .matrix-3 .matrix-row { grid-template-columns: 1.4fr 1.6fr 2fr; }
+
+  .matrix-5 .matrix-header,
+  .matrix-5 .matrix-row { grid-template-columns: 1fr 1.2fr 1.2fr 1.4fr 1.2fr; }
+
+  .matrix-row .matrix-cell:first-child {
+    font-family: var(--mono);
+    font-weight: 500;
+    color: var(--accent);
+  }
+
+  /* ── Code blocks ── */
+  .code-block {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin: 12px 0;
+    overflow: hidden;
+  }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg3);
+    gap: 8px;
+  }
+
+  .code-lang {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text3);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .code-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text2);
+    flex: 1;
+  }
+
+  .copy-btn {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text3);
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 2px 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+  }
+
+  .copy-btn:hover { color: var(--text); border-color: var(--border2); }
+  .copy-btn.copied { color: var(--green); border-color: var(--green2); }
+
+  pre {
+    padding: 16px;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.65;
+  }
+
+  .c-comment { color: var(--text3); font-style: italic; }
+  .c-cmd     { color: var(--accent); }
+  .c-flag    { color: var(--teal); }
+  .c-string  { color: var(--green); }
+  .c-var     { color: var(--amber); }
+  .c-keyword { color: var(--purple); }
+  .c-fix     { color: var(--red); font-style: italic; }
+
+  /* ── Callouts ── */
+  .callout {
+    border-left: 3px solid;
+    border-radius: 0 6px 6px 0;
+    padding: 12px 16px;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+
+  .callout-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 5px;
+  }
+
+  .callout.concept  { border-color: var(--accent);  background: rgba(91,141,238,0.06); }
+  .callout.concept  .callout-title { color: var(--accent); }
+  .callout.warning  { border-color: var(--amber);   background: var(--amber-bg); }
+  .callout.warning  .callout-title { color: var(--amber); }
+  .callout.key      { border-color: var(--green);   background: var(--green-bg); }
+  .callout.key      .callout-title { color: var(--green); }
+  .callout.test     { border-color: var(--purple);  background: var(--purple-bg); }
+  .callout.test     .callout-title { color: var(--purple); }
+  .callout.fixed    { border-color: var(--red);     background: var(--red-bg); }
+  .callout.fixed    .callout-title { color: var(--red); }
+
+  .callout p { margin: 0; color: var(--text2); }
+  .callout code {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--text);
+    background: rgba(255,255,255,0.05);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  /* ── Test results ── */
+  .test-result {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 5px;
+    margin: 5px 0;
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+
+  .test-result.allow { background: var(--green-bg); border: 1px solid var(--green2); }
+  .test-result.deny  { background: var(--red-bg);   border: 1px solid #4a1a1a; }
+
+  .result-badge {
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 2px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .allow .result-badge { background: var(--green2); color: #a0f0cc; }
+  .deny  .result-badge { background: #5a1a1a;       color: #f0a0a0; }
+
+  .result-text { color: var(--text2); line-height: 1.4; }
+  .result-text .why { color: var(--text3); font-size: 11px; display: block; margin-top: 2px; }
+
+  /* ── Phase header ── */
+  .phase-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+
+  .phase-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .phase-icon.blue   { background: rgba(91,141,238,0.15); color: var(--accent);  border: 1px solid rgba(91,141,238,0.25); }
+  .phase-icon.green  { background: var(--green-bg);  color: var(--green);  border: 1px solid var(--green2); }
+  .phase-icon.amber  { background: var(--amber-bg);  color: var(--amber);  border: 1px solid #5a3a08; }
+  .phase-icon.purple { background: var(--purple-bg); color: var(--purple); border: 1px solid #4a3680; }
+  .phase-icon.teal   { background: var(--teal-bg);   color: var(--teal);   border: 1px solid #1a4a6a; }
+  .phase-icon.red    { background: var(--red-bg);    color: var(--red);    border: 1px solid #5a1a1a; }
+
+  .phase-header-text .phase-num-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--text3);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .phase-header-text .phase-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #d0d6ec;
+  }
+
+  /* ── Concepts grid ── */
+  .concepts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 16px 0;
+  }
+
+  .concept-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+
+  .concept-card-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .concept-card p { font-size: 12.5px; color: var(--text2); margin: 0; }
+
+  /* ── Checklist ── */
+  .checklist { margin: 12px 0; }
+
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+
+  .check-item:last-child { border-bottom: none; }
+
+  .check-box {
+    width: 16px;
+    height: 16px;
+    border: 1px solid var(--border2);
+    border-radius: 3px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+
+  .check-box:hover { border-color: var(--accent); }
+  .check-box.checked { background: var(--accent2); border-color: var(--accent); }
+  .check-box.checked::after { content: '✓'; font-size: 10px; color: #fff; font-weight: 600; }
+
+  .check-text { color: var(--text2); line-height: 1.5; }
+  .check-text code {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--text);
+    background: rgba(255,255,255,0.05);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  /* ── File tree ── */
+  .file-tree {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 16px;
+    line-height: 2;
+    color: var(--text2);
+  }
+
+  .file-tree .dir  { color: var(--accent); }
+  .file-tree .json { color: var(--green); }
+  .file-tree .note { color: var(--text3); font-style: italic; }
+
+  /* ── Flow ── */
+  .flow-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 8px 0;
+    overflow-x: auto;
+    padding: 2px 0;
+  }
+
+  .flow-node {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 7px 13px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text2);
+    white-space: nowrap;
+    flex-shrink: 0;
+    text-align: center;
+  }
+
+  .flow-node small { display: block; font-size: 9.5px; color: var(--text3); margin-top: 1px; }
+  .flow-node.hl    { border-color: var(--accent); color: var(--accent); background: rgba(91,141,238,0.07); }
+  .flow-node.gr    { border-color: var(--green2); color: var(--green);  background: var(--green-bg); }
+  .flow-node.am    { border-color: #5a3a08;       color: var(--amber);  background: var(--amber-bg); }
+  .flow-node.pu    { border-color: #4a3680;       color: var(--purple); background: var(--purple-bg); }
+
+  .flow-arr { color: var(--text3); font-size: 14px; padding: 0 5px; flex-shrink: 0; }
+
+  /* ── Verify block ── */
+  .verify-block {
+    background: rgba(62,207,142,0.04);
+    border: 1px solid var(--green2);
+    border-radius: 6px;
+    margin: 12px 0;
+    overflow: hidden;
+  }
+
+  .verify-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 14px;
+    border-bottom: 1px solid var(--green2);
+    background: rgba(62,207,142,0.06);
+  }
+
+  .verify-header span {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--green);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .verify-block pre {
+    padding: 12px 16px;
+    font-size: 12px;
+  }
+
+  /* ── Errata block ── */
+  .errata {
+    background: rgba(224,92,92,0.04);
+    border: 1px solid rgba(224,92,92,0.25);
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin: 10px 0;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--text2);
+    display: flex;
+    gap: 10px;
+  }
+
+  .errata-label {
+    color: var(--red);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+    padding-top: 1px;
+    font-weight: 600;
+  }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+  @media (max-width: 900px) {
+    nav { display: none; }
+    main { padding: 28px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<nav id="sidebar">
+  <div class="nav-logo">
+    <span class="project-tag">Project 01 · IAM & Identity</span>
+    <h1>Least Privilege<br>IAM Lab <span style="font-size:10px;color:var(--green);font-weight:400">v3</span></h1>
+  </div>
+
+  <div class="nav-section-label">Overview</div>
+  <a href="#overview">Lab Overview</a>
+  <a href="#structure">Lab Structure</a>
+  <a href="#changes">What Changed</a>
+  <a href="#prereqs">Prerequisites</a>
+
+  <div class="nav-section-label">Phases</div>
+  <a href="#phase1"><span class="phase-num">P1</span> Groups</a>
+  <a href="#phase2"><span class="phase-num">P2</span> Roles <span class="fix-badge">fix</span></a>
+  <a href="#phase3"><span class="phase-num">P3</span> Managed Policy on Group</a>
+  <a href="#phase4"><span class="phase-num">P4</span> Inline Policies <span class="fix-badge">fix</span></a>
+  <a href="#phase5"><span class="phase-num">P5</span> Users + Profiles <span class="fix-badge">fix</span></a>
+  <a href="#phase6"><span class="phase-num">P6</span> Permission Boundary</a>
+  <a href="#phase7"><span class="phase-num">P7</span> Test Buckets <span class="fix-badge">new</span></a>
+  <a href="#phase8"><span class="phase-num">P8</span> CloudTrail <span class="fix-badge">fix</span></a>
+
+  <div class="nav-section-label">Testing</div>
+  <a href="#restore">Restore Variables <span class="fix-badge">new</span></a>
+  <a href="#test1">T1 — Simulate alice <span class="fix-badge">fix</span></a>
+  <a href="#test2">T2 — alice live creds <span class="fix-badge">new</span></a>
+  <a href="#test4">T4 — bob zero → EC2 <span class="fix-badge">fix</span></a>
+  <a href="#test5">T5 — carol session policy</a>
+  <a href="#test6">T6 — Boundary escalation <span class="fix-badge">fix</span></a>
+  <a href="#test7">T7 — Policy Simulator UI</a>
+  <a href="#test8">T8 — CloudTrail audit <span class="fix-badge">fix</span></a>
+
+  <div class="nav-divider"></div>
+  <a href="#concepts">Concepts Summary</a>
+  <a href="#cleanup">Cleanup</a>
+</nav>
+
+<!-- ── MAIN ── -->
+<main>
+
+  <!-- HEADER -->
+  <div class="lab-header">
+    <div class="breadcrumb">AWS Cloud Security Projects → <span>Project 01 — v2</span></div>
+    <h1>Least Privilege IAM Lab</h1>
+    <p class="subtitle">Complete corrected edition — v3. Three groups, three distinct access patterns — direct RBAC, forced role assumption, and STS session policy narrowing. Developer group uses standing permissions only; role assumption is reserved for ops and readonly patterns. All bugs from v1 fixed, testing gaps filled.</p>
+    <div class="meta-row">
+      <span class="badge badge-amber">BEGINNER</span>
+      <span class="badge badge-blue">IAM</span>
+      <span class="badge badge-blue">STS</span>
+      <span class="badge badge-green">CLOUDTRAIL</span>
+      <span class="badge badge-purple">POLICY SIMULATOR</span>
+      <span class="badge badge-teal">~2 HOURS</span>
+      <span class="badge badge-red">13 CHANGES</span>
+    </div>
+  </div>
+
+  <!-- ── OVERVIEW ── -->
+  <section id="overview">
+    <h2><span class="section-num">00</span> Lab Overview</h2>
+
+    <p>This lab demonstrates IAM least privilege through three progressively sophisticated access patterns, one per group. Each group teaches a distinct real-world model for how permissions should flow in production environments.</p>
+
+    <div class="concepts-grid">
+      <div class="concept-card">
+        <div class="concept-card-title" style="color:var(--accent)">Least Privilege</div>
+        <p>Grant only the permissions required. Start from deny-all, add only what is needed, use explicit denies for critical exclusions.</p>
+      </div>
+      <div class="concept-card">
+        <div class="concept-card-title" style="color:var(--purple)">RBAC</div>
+        <p>Policies live on groups and roles, not individual users. Users inherit access purely through group membership.</p>
+      </div>
+      <div class="concept-card">
+        <div class="concept-card-title" style="color:var(--amber)">Permission Boundaries</div>
+        <p>A hard ceiling on maximum permissions. Even AdministratorAccess is cut down if the action falls outside the boundary.</p>
+      </div>
+      <div class="concept-card">
+        <div class="concept-card-title" style="color:var(--teal)">STS + Session Policies</div>
+        <p>Exchange long-lived credentials for short-lived scoped creds. Session policies narrow the role's permissions at assume-time.</p>
+      </div>
+    </div>
+
+    <div class="callout concept">
+      <div class="callout-title">Effective permissions formula</div>
+      <p>Effective = (Identity policy) ∩ (Permission boundary) ∩ (Session policy if STS used). All three layers must allow an action for it to succeed. Any one layer denying it is enough to block it.</p>
+    </div>
+  </section>
+
+  <!-- ── LAB STRUCTURE ── -->
+  <section id="structure">
+    <h2><span class="section-num">01</span> Lab Structure</h2>
+
+    <div class="matrix matrix-4">
+      <div class="matrix-header">
+        <div class="matrix-cell">Group</div>
+        <div class="matrix-cell">User</div>
+        <div class="matrix-cell">Pattern</div>
+        <div class="matrix-cell">Concept demonstrated</div>
+      </div>
+      <div class="matrix-row">
+        <div class="matrix-cell">developers</div>
+        <div class="matrix-cell">dev-alice</div>
+        <div class="matrix-cell">Managed policy on group — direct standing permissions</div>
+        <div class="matrix-cell">Direct RBAC — no role assumption required; permission boundary as ceiling</div>
+      </div>
+      <div class="matrix-row">
+        <div class="matrix-cell">ops-team</div>
+        <div class="matrix-cell">ops-bob</div>
+        <div class="matrix-cell">Group grants only sts:AssumeRole</div>
+        <div class="matrix-cell">Zero standing access — must exchange for temp creds to act</div>
+      </div>
+      <div class="matrix-row">
+        <div class="matrix-cell">readonly-team</div>
+        <div class="matrix-cell">readonly-carol</div>
+        <div class="matrix-cell">AssumeRole + session policy injected at call-time</div>
+        <div class="matrix-cell">Role has broad ReadOnly, session policy narrows per-session to S3 only</div>
+      </div>
+    </div>
+
+    <h3>Architecture flows</h3>
+    <div style="display:flex;flex-direction:column;gap:10px;margin:16px 0;overflow-x:auto;">
+      <div class="flow-row">
+        <div class="flow-node hl">dev-alice<small>IAM user</small></div>
+        <div class="flow-arr">→</div>
+        <div class="flow-node">developers<small>group</small></div>
+        <div class="flow-arr">→</div>
+        <div class="flow-node gr">dev-s3-limited<small>managed policy</small></div>
+        <div class="flow-arr">→</div>
+        <div class="flow-node gr">S3 access<small>always-on, no role needed</small></div>
+      </div>
+      <div class="flow-row">
+        <div class="flow-node hl">ops-bob<small>IAM user</small></div>
+        <div class="flow-arr">→</div>
+        <div class="flow-node">ops-team<small>group</small></div>
+        <div class="flow-arr">→</div>
+        <div class="flow-node am">sts:AssumeRole only<small>no direct access</small></div>
+        <div class="flow-arr">→</div>
+        <div class="flow-node am">ops-role<small>temp EC2 creds</small></div>
+      </div>
+      <div class="flow-row">
+        <div class="flow-node hl">readonly-carol<small>IAM user</small></div>
+        <div class="flow-arr">→</div>
+        <div class="flow-node">readonly-team<small>group</small></div>
+        <div class="flow-arr">→</div>
+        <div class="flow-node pu">AssumeRole +<small>session policy</small></div>
+        <div class="flow-arr">→</div>
+        <div class="flow-node pu">S3 reads only<small>role ∩ session</small></div>
+      </div>
+    </div>
+
+    <h3>Local file structure</h3>
+    <div class="file-tree">
+      <span class="dir">iam-lab/</span><br>
+      &nbsp;&nbsp;├── <span class="json">dev-s3-limited.json</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="note"># managed policy — S3 access scoped to dev-bucket</span><br>
+      &nbsp;&nbsp;├── <span class="json">ops-ec2-policy.json</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="note"># inline on ops-role — EC2 start/stop, no terminate</span><br>
+      &nbsp;&nbsp;├── <span class="json">ops-group-assume.json</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="note"># inline on ops-team — only sts:AssumeRole</span><br>
+      &nbsp;&nbsp;├── <span class="json">readonly-group-assume.json</span>&nbsp;<span class="note"># inline on readonly-team — only sts:AssumeRole</span><br>
+      &nbsp;&nbsp;├── <span class="json">dev-boundary.json</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="note"># permission boundary for dev-alice</span><br>
+      &nbsp;&nbsp;├── <span class="json">trust-ops-team.json</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="note"># trust policy — ops-* users can assume ops-role</span><br>
+      &nbsp;&nbsp;├── <span class="json">trust-readonly-team.json</span>&nbsp;&nbsp;<span class="note"># trust policy — readonly-* users can assume readonly-role</span><br>
+      &nbsp;&nbsp;├── <span class="json">carol-session-policy.json</span>&nbsp;<span class="note"># session policy passed at carol's assume-time</span><br>
+      &nbsp;&nbsp;└── <span class="json">trail-bucket-policy.json</span>&nbsp;&nbsp;<span class="note"># S3 bucket policy required by CloudTrail service</span>
+    </div>
+  </section>
+
+  <!-- ── WHAT CHANGED ── -->
+  <section id="changes">
+    <h2><span class="section-num">02</span> What Changed From v1</h2>
+    <p>Twelve bugs fixed, four improvements added. Each <span style="color:var(--red);font-family:var(--mono);font-size:12px">fix</span> tag in the sidebar marks an affected section.</p>
+
+    <div class="matrix matrix-3">
+      <div class="matrix-header">
+        <div class="matrix-cell">#</div>
+        <div class="matrix-cell">Bug / gap</div>
+        <div class="matrix-cell">Fix applied</div>
+      </div>
+      <div class="matrix-row">
+        <div class="matrix-cell">01</div>
+        <div class="matrix-cell">Inline policies referenced roles before roles existed</div>
+        <div class="matrix-cell">Roles now created in P2 before inline policies in P4</div>
+      </div>
+      <div class="matrix-row">
+        <div class="matrix-cell">02</div>
+        <div class="matrix-cell">alice had no sts:AssumeRole permission for dev-s3-role (v1 → v2 fix)</div>
+        <div class="matrix-cell">Superseded in v3 — assume-role removed from developers entirely. See entry #13</div>
+      </div>
+      <div class="matrix-row">
+        <div class="matrix-cell">03</div>
+        <div class="matrix-cell">i-fake123 invalid instance ID — EC2 rejects before IAM evaluates</div>
+        <div class="matrix-cell">Replaced with valid-format i-1234567890abcdef0 throughout</div>
+      </div>
+      <div class="matrix-row">
+        <div class="matrix-cell">04</div>
+        <div class="matrix-cell">python3 -c for STS parsing — fragile external dependency</div>
+        <div class="matrix-cell">Replaced with --query + --output text + read (pure bash)</div>
+      </div>
+      <div class="matrix-row">
+        <div class="matrix-cell">05</div>
+        <div class="matrix-cell">sed -i breaks on macOS — different flag required</div>
+        <div class="matrix-cell">Cross-platform envsubst approach with macOS fallback noted</div>
+      </div>
+      <div class="matrix-row">
+        <div class="matrix-cell">06</div>
+        <div class="matrix-cell">Profile configs missing region — inherits wrong region in some setups</div>
+        <div class="matrix-cell">Explicit --region us-east-1 added to all profile configure calls</div>
+      </div>
+      <div class="matrix-row">
+        <div class="matrix-cell">07</div>
+        <div class="matrix-cell">dev-bucket never created — alice's live test had no real target</div>
+        <div class="matrix-cell">P7 creates dev-bucket + other-bucket + uploads test objects</div>
+      </div>
+      <div class="matrix-row">
+        <div class="matrix-cell">08</div>
+        <div class="matrix-cell">Shell variables lost between sessions — no restore mechanism</div>
+        <div class="matrix-cell">Restore block before Testing section re-exports all ARNs</div>
+      </div>
+      <div class="matrix-row">
+        <div class="matrix-cell">09</div>
+        <div class="matrix-cell">CloudTrail timing said "~5 min" — actually up to 15 min</div>
+        <div class="matrix-cell">Corrected to "up to 15 minutes" with lookup verification</div>
+      </div>
+      <div class="matrix-row">
+        <div class="matrix-cell">10</div>
+        <div class="matrix-cell">aws ce get-cost-and-usage — Cost Explorer needs separate enablement</div>
+        <div class="matrix-cell">Replaced with budgets:ViewBudget which uses same deny but doesn't need enabling</div>
+      </div>
+      <div class="matrix-row">
+        <div class="matrix-cell">11</div>
+        <div class="matrix-cell">simulate with --resource-arns "*" inaccurate for resource-scoped actions</div>
+        <div class="matrix-cell">Simulation now uses real ARN formats for every test</div>
+      </div>
+      <div class="matrix-row">
+        <div class="matrix-cell">13</div>
+        <div class="matrix-cell">developers group had sts:AssumeRole for dev-s3-role, blurring the distinction between RBAC patterns</div>
+        <div class="matrix-cell">v3 removes assume-role from developers entirely. Each group now demonstrates a single, distinct access pattern: direct RBAC (alice), forced assume-role (bob), assume-role + session policy (carol)</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── PREREQS ── -->
+  <section id="prereqs">
+    <h2><span class="section-num">03</span> Prerequisites</h2>
+
+    <div class="checklist">
+      <div class="check-item"><div class="check-box" onclick="toggleCheck(this)"></div><span class="check-text">AWS CLI v2 installed and configured with admin-level credentials (<code>aws configure</code>)</span></div>
+      <div class="check-item"><div class="check-box" onclick="toggleCheck(this)"></div><span class="check-text">Default region set to <code>us-east-1</code> — run <code>aws configure set region us-east-1</code></span></div>
+      <div class="check-item"><div class="check-box" onclick="toggleCheck(this)"></div><span class="check-text"><code>envsubst</code> available — part of <code>gettext</code> package. Install: <code>sudo apt install gettext</code> (Ubuntu) or <code>brew install gettext</code> (macOS)</span></div>
+      <div class="check-item"><div class="check-box" onclick="toggleCheck(this)"></div><span class="check-text">Working directory created and entered: <code>mkdir iam-lab && cd iam-lab</code></span></div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">bash</span>
+        <span class="code-title">verify setup + export account ID</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="c-comment"># Confirm active identity</span>
+<span class="c-cmd">aws</span> sts get-caller-identity
+
+<span class="c-comment"># Confirm region</span>
+<span class="c-cmd">aws</span> configure get region
+
+<span class="c-comment"># Export ACCOUNT_ID — used in every phase</span>
+<span class="c-keyword">export</span> <span class="c-var">ACCOUNT_ID</span>=$(<span class="c-cmd">aws</span> sts get-caller-identity <span class="c-flag">--query</span> Account <span class="c-flag">--output</span> text)
+<span class="c-cmd">echo</span> <span class="c-string">"Account ID: $ACCOUNT_ID"</span>
+
+<span class="c-comment"># Create and enter working directory</span>
+<span class="c-cmd">mkdir</span> -p iam-lab <span class="c-keyword">&&</span> <span class="c-cmd">cd</span> iam-lab</pre>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       PHASE 1 — GROUPS
+  ════════════════════════════════════════════ -->
+  <section id="phase1">
+    <div class="phase-header">
+      <div class="phase-icon blue">P1</div>
+      <div class="phase-header-text">
+        <div class="phase-num-label">Phase 1</div>
+        <div class="phase-title">Create Groups</div>
+      </div>
+    </div>
+
+    <p>Groups are the RBAC containers. Policies and role assume permissions attach to groups — users inherit everything through membership. Create all three before any policies are written.</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">bash</span>
+        <span class="code-title">create all three groups</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="c-cmd">aws</span> iam create-group <span class="c-flag">--group-name</span> developers
+<span class="c-cmd">aws</span> iam create-group <span class="c-flag">--group-name</span> ops-team
+<span class="c-cmd">aws</span> iam create-group <span class="c-flag">--group-name</span> readonly-team</pre>
+    </div>
+
+    <div class="verify-block">
+      <div class="verify-header"><span>verify</span></div>
+      <pre><span class="c-cmd">aws</span> iam list-groups <span class="c-flag">--query</span> <span class="c-string">"Groups[*].GroupName"</span> <span class="c-flag">--output</span> table
+<span class="c-comment"># Expected: developers, ops-team, readonly-team</span></pre>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       PHASE 2 — ROLES (moved before inline policies)
+  ════════════════════════════════════════════ -->
+  <section id="phase2">
+    <div class="phase-header">
+      <div class="phase-icon purple">P2</div>
+      <div class="phase-header-text">
+        <div class="phase-num-label">Phase 2</div>
+        <div class="phase-title">Create Roles <span class="fix-badge">reordered</span></div>
+      </div>
+    </div>
+
+    <div class="errata">
+      <span class="errata-label">v1 bug</span>
+      <span>v1 created roles in Phase 6 but inline policies in Phase 3 already referenced role ARNs. Fixed by creating roles first. ARNs are deterministic so the policies could be written without the roles existing, but creating roles first is clearer and avoids confusion when verifying.</span>
+    </div>
+
+    <p>Each role needs two things: a trust policy (who can assume it) and permissions (what they can do after assuming). Trust policies are set at role creation time — permissions are attached after. The <code>developers</code> group uses direct managed policy permissions only, so no role is created for alice.</p>
+
+    <h3>ops-role — assumed by ops-* users for EC2 operations</h3>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">bash</span>
+        <span class="code-title">trust-ops-team.json + ops-ec2-policy.json</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="c-comment"># Trust policy: any user whose ARN matches ops-* in this account</span>
+<span class="c-cmd">cat</span> > trust-ops-team.json &lt;&lt; EOF
+{
+  <span class="c-string">"Version"</span>: <span class="c-string">"2012-10-17"</span>,
+  <span class="c-string">"Statement"</span>: [{
+    <span class="c-string">"Effect"</span>: <span class="c-string">"Allow"</span>,
+    <span class="c-string">"Principal"</span>: { <span class="c-string">"AWS"</span>: <span class="c-string">"arn:aws:iam::${ACCOUNT_ID}:root"</span> },
+    <span class="c-string">"Action"</span>: <span class="c-string">"sts:AssumeRole"</span>,
+    <span class="c-string">"Condition"</span>: {
+      <span class="c-string">"StringLike"</span>: {
+        <span class="c-string">"aws:PrincipalArn"</span>: <span class="c-string">"arn:aws:iam::${ACCOUNT_ID}:user/ops-*"</span>
+      }
+    }
+  }]
+}
+EOF
+
+<span class="c-cmd">aws</span> iam create-role \
+  <span class="c-flag">--role-name</span> ops-role \
+  <span class="c-flag">--assume-role-policy-document</span> file://trust-ops-team.json \
+  <span class="c-flag">--description</span> <span class="c-string">"EC2 ops role — ops team must assume this to act"</span>
+
+<span class="c-comment"># Inline policy on the role: EC2 start/stop, no delete/terminate</span>
+<span class="c-cmd">cat</span> > ops-ec2-policy.json &lt;&lt; <span class="c-string">'EOF'</span>
+{
+  <span class="c-string">"Version"</span>: <span class="c-string">"2012-10-17"</span>,
+  <span class="c-string">"Statement"</span>: [
+    {
+      <span class="c-string">"Sid"</span>: <span class="c-string">"EC2OpsAccess"</span>,
+      <span class="c-string">"Effect"</span>: <span class="c-string">"Allow"</span>,
+      <span class="c-string">"Action"</span>: [<span class="c-string">"ec2:Describe*"</span>, <span class="c-string">"ec2:StartInstances"</span>, <span class="c-string">"ec2:StopInstances"</span>],
+      <span class="c-string">"Resource"</span>: <span class="c-string">"*"</span>,
+      <span class="c-string">"Condition"</span>: {
+        <span class="c-string">"StringEquals"</span>: { <span class="c-string">"aws:RequestedRegion"</span>: <span class="c-string">"us-east-1"</span> }
+      }
+    },
+    {
+      <span class="c-string">"Sid"</span>: <span class="c-string">"DenyDestructive"</span>,
+      <span class="c-string">"Effect"</span>: <span class="c-string">"Deny"</span>,
+      <span class="c-string">"Action"</span>: [<span class="c-string">"ec2:TerminateInstances"</span>, <span class="c-string">"ec2:DeleteSecurityGroup"</span>],
+      <span class="c-string">"Resource"</span>: <span class="c-string">"*"</span>
+    }
+  ]
+}
+EOF
+
+<span class="c-cmd">aws</span> iam put-role-policy \
+  <span class="c-flag">--role-name</span> ops-role \
+  <span class="c-flag">--policy-name</span> ops-ec2-inline \
+  <span class="c-flag">--policy-document</span> file://ops-ec2-policy.json</pre>
+    </div>
+
+    <h3>readonly-role — assumed by readonly-* users with broad ReadOnly permissions</h3>
+
+    <div class="callout concept">
+      <div class="callout-title">Why ReadOnlyAccess on the role is intentional</div>
+      <p>The role gets full <code>ReadOnlyAccess</code> deliberately. The per-session narrowing happens when carol calls <code>AssumeRole</code> with a session policy that restricts to S3 only. Same role, different effective permissions per caller. This is the power of session policies.</p>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">bash</span>
+        <span class="code-title">trust-readonly-team.json + attach ReadOnlyAccess</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="c-cmd">cat</span> > trust-readonly-team.json &lt;&lt; EOF
+{
+  <span class="c-string">"Version"</span>: <span class="c-string">"2012-10-17"</span>,
+  <span class="c-string">"Statement"</span>: [{
+    <span class="c-string">"Effect"</span>: <span class="c-string">"Allow"</span>,
+    <span class="c-string">"Principal"</span>: { <span class="c-string">"AWS"</span>: <span class="c-string">"arn:aws:iam::${ACCOUNT_ID}:root"</span> },
+    <span class="c-string">"Action"</span>: <span class="c-string">"sts:AssumeRole"</span>,
+    <span class="c-string">"Condition"</span>: {
+      <span class="c-string">"StringLike"</span>: {
+        <span class="c-string">"aws:PrincipalArn"</span>: <span class="c-string">"arn:aws:iam::${ACCOUNT_ID}:user/readonly-*"</span>
+      }
+    }
+  }]
+}
+EOF
+
+<span class="c-cmd">aws</span> iam create-role \
+  <span class="c-flag">--role-name</span> readonly-role \
+  <span class="c-flag">--assume-role-policy-document</span> file://trust-readonly-team.json \
+  <span class="c-flag">--description</span> <span class="c-string">"Full ReadOnly — session policy narrows per-session"</span>
+
+<span class="c-cmd">aws</span> iam attach-role-policy \
+  <span class="c-flag">--role-name</span> readonly-role \
+  <span class="c-flag">--policy-arn</span> arn:aws:iam::aws:policy/ReadOnlyAccess</pre>
+    </div>
+
+    <div class="verify-block">
+      <div class="verify-header"><span>verify both roles created</span></div>
+      <pre><span class="c-cmd">aws</span> iam list-roles \
+  <span class="c-flag">--query</span> <span class="c-string">"Roles[?contains('ops-role readonly-role', RoleName)].{Name:RoleName,Created:CreateDate}"</span> \
+  <span class="c-flag">--output</span> table</pre>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       PHASE 3 — MANAGED POLICY + GROUP ASSUME-ROLE
+  ════════════════════════════════════════════ -->
+  <section id="phase3">
+    <div class="phase-header">
+      <div class="phase-icon green">P3</div>
+      <div class="phase-header-text">
+        <div class="phase-num-label">Phase 3</div>
+        <div class="phase-title">Managed Policy on developers Group</div>
+      </div>
+    </div>
+
+    <p>The <code>developers</code> group gets one thing: the <code>dev-s3-limited</code> managed policy attached directly. This gives <code>dev-alice</code> always-on, standing S3 access without any role exchange. No <code>sts:AssumeRole</code> permission is granted — that pattern belongs to ops-team and readonly-team, which are demonstrated in P4.</p>
+
+    <div class="callout warning">
+      <div class="callout-title">sed -i cross-platform note</div>
+      <p><code>sed -i "..."</code> on Linux works as written. On macOS, it requires <code>sed -i '' "..."</code>. This lab uses <code>envsubst</code> to substitute variables into JSON templates instead, which is identical on both platforms.</p>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">bash</span>
+        <span class="code-title">dev-s3-limited.json — write, substitute, create, attach to group</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="c-comment"># Write template with $ACCOUNT_ID placeholder</span>
+<span class="c-cmd">cat</span> > dev-s3-limited.json &lt;&lt; <span class="c-string">'EOF'</span>
+{
+  <span class="c-string">"Version"</span>: <span class="c-string">"2012-10-17"</span>,
+  <span class="c-string">"Statement"</span>: [
+    {
+      <span class="c-string">"Sid"</span>: <span class="c-string">"S3ListAll"</span>,
+      <span class="c-string">"Effect"</span>: <span class="c-string">"Allow"</span>,
+      <span class="c-string">"Action"</span>: [<span class="c-string">"s3:ListAllMyBuckets"</span>, <span class="c-string">"s3:GetBucketLocation"</span>],
+      <span class="c-string">"Resource"</span>: <span class="c-string">"*"</span>
+    },
+    {
+      <span class="c-string">"Sid"</span>: <span class="c-string">"S3DevBucketAccess"</span>,
+      <span class="c-string">"Effect"</span>: <span class="c-string">"Allow"</span>,
+      <span class="c-string">"Action"</span>: [
+        <span class="c-string">"s3:GetObject"</span>, <span class="c-string">"s3:PutObject"</span>,
+        <span class="c-string">"s3:DeleteObject"</span>, <span class="c-string">"s3:ListBucket"</span>
+      ],
+      <span class="c-string">"Resource"</span>: [
+        <span class="c-string">"arn:aws:s3:::dev-bucket-$ACCOUNT_ID"</span>,
+        <span class="c-string">"arn:aws:s3:::dev-bucket-$ACCOUNT_ID/*"</span>
+      ]
+    },
+    {
+      <span class="c-string">"Sid"</span>: <span class="c-string">"DenyBilling"</span>,
+      <span class="c-string">"Effect"</span>: <span class="c-string">"Deny"</span>,
+      <span class="c-string">"Action"</span>: [<span class="c-string">"aws-portal:*"</span>, <span class="c-string">"budgets:*"</span>, <span class="c-string">"ce:*"</span>],
+      <span class="c-string">"Resource"</span>: <span class="c-string">"*"</span>
+    }
+  ]
+}
+EOF
+
+<span class="c-comment"># envsubst substitutes $ACCOUNT_ID — works identically on Linux and macOS</span>
+<span class="c-cmd">envsubst</span> &lt; dev-s3-limited.json > dev-s3-limited-final.json
+
+<span class="c-comment"># Create the managed policy</span>
+<span class="c-cmd">aws</span> iam create-policy \
+  <span class="c-flag">--policy-name</span> dev-s3-limited \
+  <span class="c-flag">--policy-document</span> file://dev-s3-limited-final.json \
+  <span class="c-flag">--description</span> <span class="c-string">"Least privilege S3 for developers — scoped to dev-bucket only"</span>
+
+<span class="c-comment"># Save ARN — reused in cleanup</span>
+<span class="c-keyword">export</span> <span class="c-var">DEV_S3_POLICY_ARN</span>=$(<span class="c-cmd">aws</span> iam list-policies \
+  <span class="c-flag">--query</span> <span class="c-string">"Policies[?PolicyName=='dev-s3-limited'].Arn"</span> \
+  <span class="c-flag">--output</span> text)
+<span class="c-cmd">echo</span> <span class="c-string">"DEV_S3_POLICY_ARN=$DEV_S3_POLICY_ARN"</span>
+
+<span class="c-comment"># Attach managed policy to developers group only — no role assumption for this group</span>
+<span class="c-cmd">aws</span> iam attach-group-policy \
+  <span class="c-flag">--group-name</span> developers \
+  <span class="c-flag">--policy-arn</span> <span class="c-var">$DEV_S3_POLICY_ARN</span></pre>
+    </div>
+
+    <div class="callout concept">
+      <div class="callout-title">Why no role for developers?</div>
+      <p>The <code>developers</code> group demonstrates pure direct RBAC — the managed policy grants standing access without any role exchange. This is deliberately distinct from the <code>ops-team</code> and <code>readonly-team</code> patterns which both require <code>sts:AssumeRole</code> to act at all. Keeping each group's access model separate makes the contrast between patterns explicit and easier to reason about.</p>
+    </div>
+
+    <div class="verify-block">
+      <div class="verify-header"><span>verify developers group policy</span></div>
+      <pre><span class="c-comment"># Managed policy attached to group</span>
+<span class="c-cmd">aws</span> iam list-attached-group-policies \
+  <span class="c-flag">--group-name</span> developers \
+  <span class="c-flag">--query</span> <span class="c-string">"AttachedPolicies[*].PolicyName"</span>
+<span class="c-comment"># Expected: ["dev-s3-limited"]</span>
+
+<span class="c-comment"># Confirm no inline policies exist on developers (no assume-role permission)</span>
+<span class="c-cmd">aws</span> iam list-group-policies \
+  <span class="c-flag">--group-name</span> developers \
+  <span class="c-flag">--query</span> <span class="c-string">"PolicyNames"</span>
+<span class="c-comment"># Expected: [] — developers group has standing access only, no STS permissions</span></pre>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       PHASE 4 — INLINE POLICIES ON GROUPS
+  ════════════════════════════════════════════ -->
+  <section id="phase4">
+    <div class="phase-header">
+      <div class="phase-icon amber">P4</div>
+      <div class="phase-header-text">
+        <div class="phase-num-label">Phase 4</div>
+        <div class="phase-title">Inline Policies on ops-team and readonly-team <span class="fix-badge">reordered</span></div>
+      </div>
+    </div>
+
+    <p>Each of these groups gets exactly one inline policy: the permission to call <code>sts:AssumeRole</code> on their specific role. These groups have zero direct AWS service permissions — they can only act by assuming their role.</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">bash</span>
+        <span class="code-title">ops-group-assume.json + readonly-group-assume.json</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="c-comment"># ops-team: one permission — call AssumeRole on ops-role only</span>
+<span class="c-cmd">cat</span> > ops-group-assume.json &lt;&lt; EOF
+{
+  <span class="c-string">"Version"</span>: <span class="c-string">"2012-10-17"</span>,
+  <span class="c-string">"Statement"</span>: [{
+    <span class="c-string">"Sid"</span>: <span class="c-string">"AllowAssumeOpsRole"</span>,
+    <span class="c-string">"Effect"</span>: <span class="c-string">"Allow"</span>,
+    <span class="c-string">"Action"</span>: <span class="c-string">"sts:AssumeRole"</span>,
+    <span class="c-string">"Resource"</span>: <span class="c-string">"arn:aws:iam::${ACCOUNT_ID}:role/ops-role"</span>
+  }]
+}
+EOF
+
+<span class="c-cmd">aws</span> iam put-group-policy \
+  <span class="c-flag">--group-name</span> ops-team \
+  <span class="c-flag">--policy-name</span> allow-assume-ops-role \
+  <span class="c-flag">--policy-document</span> file://ops-group-assume.json
+
+<span class="c-comment"># readonly-team: one permission — call AssumeRole on readonly-role only</span>
+<span class="c-cmd">cat</span> > readonly-group-assume.json &lt;&lt; EOF
+{
+  <span class="c-string">"Version"</span>: <span class="c-string">"2012-10-17"</span>,
+  <span class="c-string">"Statement"</span>: [{
+    <span class="c-string">"Sid"</span>: <span class="c-string">"AllowAssumeReadonlyRole"</span>,
+    <span class="c-string">"Effect"</span>: <span class="c-string">"Allow"</span>,
+    <span class="c-string">"Action"</span>: <span class="c-string">"sts:AssumeRole"</span>,
+    <span class="c-string">"Resource"</span>: <span class="c-string">"arn:aws:iam::${ACCOUNT_ID}:role/readonly-role"</span>
+  }]
+}
+EOF
+
+<span class="c-cmd">aws</span> iam put-group-policy \
+  <span class="c-flag">--group-name</span> readonly-team \
+  <span class="c-flag">--policy-name</span> allow-assume-readonly-role \
+  <span class="c-flag">--policy-document</span> file://readonly-group-assume.json</pre>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       PHASE 5 — USERS + PROFILES
+  ════════════════════════════════════════════ -->
+  <section id="phase5">
+    <div class="phase-header">
+      <div class="phase-icon teal">P5</div>
+      <div class="phase-header-text">
+        <div class="phase-num-label">Phase 5</div>
+        <div class="phase-title">Create Users, Assign Groups, Configure Profiles <span class="fix-badge">fix</span></div>
+      </div>
+    </div>
+
+    <div class="errata">
+      <span class="errata-label">v1 bug</span>
+      <span>v1 configured profiles with aws configure --profile alice but never set the region. If the shell's default region differs from us-east-1, EC2 and S3 calls land in the wrong region and fail for the wrong reason. Region is now set explicitly per profile.</span>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">bash</span>
+        <span class="code-title">create users, add to groups, create keys, configure profiles</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="c-comment"># Create the three users</span>
+<span class="c-cmd">aws</span> iam create-user <span class="c-flag">--user-name</span> dev-alice
+<span class="c-cmd">aws</span> iam create-user <span class="c-flag">--user-name</span> ops-bob
+<span class="c-cmd">aws</span> iam create-user <span class="c-flag">--user-name</span> readonly-carol
+
+<span class="c-comment"># Add each to their group</span>
+<span class="c-cmd">aws</span> iam add-user-to-group <span class="c-flag">--user-name</span> dev-alice      <span class="c-flag">--group-name</span> developers
+<span class="c-cmd">aws</span> iam add-user-to-group <span class="c-flag">--user-name</span> ops-bob        <span class="c-flag">--group-name</span> ops-team
+<span class="c-cmd">aws</span> iam add-user-to-group <span class="c-flag">--user-name</span> readonly-carol <span class="c-flag">--group-name</span> readonly-team
+
+<span class="c-comment"># Create access keys (SecretAccessKey displayed once — save output)</span>
+<span class="c-cmd">aws</span> iam create-access-key <span class="c-flag">--user-name</span> dev-alice      > alice-keys.json
+<span class="c-cmd">aws</span> iam create-access-key <span class="c-flag">--user-name</span> ops-bob        > bob-keys.json
+<span class="c-cmd">aws</span> iam create-access-key <span class="c-flag">--user-name</span> readonly-carol > carol-keys.json
+
+<span class="c-comment"># Extract keys for profile setup</span>
+<span class="c-var">ALICE_AK</span>=$(<span class="c-cmd">python3</span> -c <span class="c-string">"import json; d=json.load(open('alice-keys.json')); print(d['AccessKey']['AccessKeyId'])"</span>)
+<span class="c-var">ALICE_SK</span>=$(<span class="c-cmd">python3</span> -c <span class="c-string">"import json; d=json.load(open('alice-keys.json')); print(d['AccessKey']['SecretAccessKey'])"</span>)
+<span class="c-var">BOB_AK</span>=$(<span class="c-cmd">python3</span> -c <span class="c-string">"import json; d=json.load(open('bob-keys.json')); print(d['AccessKey']['AccessKeyId'])"</span>)
+<span class="c-var">BOB_SK</span>=$(<span class="c-cmd">python3</span> -c <span class="c-string">"import json; d=json.load(open('bob-keys.json')); print(d['AccessKey']['SecretAccessKey'])"</span>)
+<span class="c-var">CAROL_AK</span>=$(<span class="c-cmd">python3</span> -c <span class="c-string">"import json; d=json.load(open('carol-keys.json')); print(d['AccessKey']['AccessKeyId'])"</span>)
+<span class="c-var">CAROL_SK</span>=$(<span class="c-cmd">python3</span> -c <span class="c-string">"import json; d=json.load(open('carol-keys.json')); print(d['AccessKey']['SecretAccessKey'])"</span>)
+
+<span class="c-comment"># Configure CLI profiles — region explicitly set on every profile</span>
+<span class="c-cmd">aws</span> configure set aws_access_key_id     <span class="c-var">$ALICE_AK</span> <span class="c-flag">--profile</span> alice
+<span class="c-cmd">aws</span> configure set aws_secret_access_key  <span class="c-var">$ALICE_SK</span> <span class="c-flag">--profile</span> alice
+<span class="c-cmd">aws</span> configure set region                us-east-1  <span class="c-flag">--profile</span> alice
+
+<span class="c-cmd">aws</span> configure set aws_access_key_id     <span class="c-var">$BOB_AK</span>   <span class="c-flag">--profile</span> bob
+<span class="c-cmd">aws</span> configure set aws_secret_access_key  <span class="c-var">$BOB_SK</span>   <span class="c-flag">--profile</span> bob
+<span class="c-cmd">aws</span> configure set region                us-east-1  <span class="c-flag">--profile</span> bob
+
+<span class="c-cmd">aws</span> configure set aws_access_key_id     <span class="c-var">$CAROL_AK</span> <span class="c-flag">--profile</span> carol
+<span class="c-cmd">aws</span> configure set aws_secret_access_key  <span class="c-var">$CAROL_SK</span> <span class="c-flag">--profile</span> carol
+<span class="c-cmd">aws</span> configure set region                us-east-1  <span class="c-flag">--profile</span> carol</pre>
+    </div>
+
+    <div class="verify-block">
+      <div class="verify-header"><span>verify profiles work and group membership is correct</span></div>
+      <pre><span class="c-comment"># Each profile should resolve to its user's ARN</span>
+<span class="c-cmd">aws</span> sts get-caller-identity <span class="c-flag">--profile</span> alice <span class="c-flag">--query</span> Arn <span class="c-flag">--output</span> text
+<span class="c-cmd">aws</span> sts get-caller-identity <span class="c-flag">--profile</span> bob   <span class="c-flag">--query</span> Arn <span class="c-flag">--output</span> text
+<span class="c-cmd">aws</span> sts get-caller-identity <span class="c-flag">--profile</span> carol <span class="c-flag">--query</span> Arn <span class="c-flag">--output</span> text
+
+<span class="c-comment"># Confirm group memberships</span>
+<span class="c-cmd">aws</span> iam list-groups-for-user <span class="c-flag">--user-name</span> dev-alice \
+  <span class="c-flag">--query</span> <span class="c-string">"Groups[*].GroupName"</span> <span class="c-flag">--output</span> text
+<span class="c-comment"># Expected: developers</span></pre>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       PHASE 6 — PERMISSION BOUNDARY
+  ════════════════════════════════════════════ -->
+  <section id="phase6">
+    <div class="phase-header">
+      <div class="phase-icon amber">P6</div>
+      <div class="phase-header-text">
+        <div class="phase-num-label">Phase 6</div>
+        <div class="phase-title">Permission Boundary on dev-alice</div>
+      </div>
+    </div>
+
+    <div class="callout concept">
+      <div class="callout-title">What a permission boundary does</div>
+      <p>A boundary is a managed policy used as a ceiling — it defines the <em>maximum</em> permissions the user can ever have. The effective permission for any action is the intersection of the user's identity policy AND the boundary. A boundary does not grant permissions — it only caps them. If the boundary allows S3 but denies IAM, the user can never call any IAM action even if AdministratorAccess is attached later.</p>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">bash</span>
+        <span class="code-title">dev-boundary.json — create, save ARN, apply to alice</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="c-cmd">cat</span> > dev-boundary.json &lt;&lt; <span class="c-string">'EOF'</span>
+{
+  <span class="c-string">"Version"</span>: <span class="c-string">"2012-10-17"</span>,
+  <span class="c-string">"Statement"</span>: [
+    {
+      <span class="c-string">"Sid"</span>: <span class="c-string">"AllowedServices"</span>,
+      <span class="c-string">"Effect"</span>: <span class="c-string">"Allow"</span>,
+      <span class="c-string">"Action"</span>: [
+        <span class="c-string">"s3:*"</span>,
+        <span class="c-string">"ec2:Describe*"</span>,
+        <span class="c-string">"sts:AssumeRole"</span>,
+        <span class="c-string">"cloudwatch:GetMetricData"</span>,
+        <span class="c-string">"logs:Describe*"</span>,
+        <span class="c-string">"logs:Get*"</span>
+      ],
+      <span class="c-string">"Resource"</span>: <span class="c-string">"*"</span>
+    },
+    {
+      <span class="c-string">"Sid"</span>: <span class="c-string">"DenyPrivilegedServices"</span>,
+      <span class="c-string">"Effect"</span>: <span class="c-string">"Deny"</span>,
+      <span class="c-string">"Action"</span>: [
+        <span class="c-string">"iam:*"</span>,
+        <span class="c-string">"organizations:*"</span>,
+        <span class="c-string">"account:*"</span>,
+        <span class="c-string">"budgets:*"</span>
+      ],
+      <span class="c-string">"Resource"</span>: <span class="c-string">"*"</span>
+    }
+  ]
+}
+EOF
+
+<span class="c-cmd">aws</span> iam create-policy \
+  <span class="c-flag">--policy-name</span> dev-permission-boundary \
+  <span class="c-flag">--policy-document</span> file://dev-boundary.json \
+  <span class="c-flag">--description</span> <span class="c-string">"Hard ceiling for dev-alice — no IAM, no billing regardless of identity policy"</span>
+
+<span class="c-keyword">export</span> <span class="c-var">BOUNDARY_ARN</span>=$(<span class="c-cmd">aws</span> iam list-policies \
+  <span class="c-flag">--query</span> <span class="c-string">"Policies[?PolicyName=='dev-permission-boundary'].Arn"</span> \
+  <span class="c-flag">--output</span> text)
+<span class="c-cmd">echo</span> <span class="c-string">"BOUNDARY_ARN=$BOUNDARY_ARN"</span>
+
+<span class="c-comment"># Apply boundary to dev-alice only</span>
+<span class="c-cmd">aws</span> iam put-user-permissions-boundary \
+  <span class="c-flag">--user-name</span> dev-alice \
+  <span class="c-flag">--permissions-boundary</span> <span class="c-var">$BOUNDARY_ARN</span></pre>
+    </div>
+
+    <div class="verify-block">
+      <div class="verify-header"><span>verify boundary applied</span></div>
+      <pre><span class="c-cmd">aws</span> iam get-user <span class="c-flag">--user-name</span> dev-alice \
+  <span class="c-flag">--query</span> <span class="c-string">"User.PermissionsBoundary.PermissionsBoundaryArn"</span> \
+  <span class="c-flag">--output</span> text
+<span class="c-comment"># Expected: arn:aws:iam::ACCOUNT_ID:policy/dev-permission-boundary</span></pre>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       PHASE 7 — TEST BUCKETS (NEW)
+  ════════════════════════════════════════════ -->
+  <section id="phase7">
+    <div class="phase-header">
+      <div class="phase-icon green">P7</div>
+      <div class="phase-header-text">
+        <div class="phase-num-label">Phase 7</div>
+        <div class="phase-title">Create Test Buckets <span class="fix-badge">new</span></div>
+      </div>
+    </div>
+
+    <p>v1 referenced <code>dev-bucket</code> throughout all policy documents and simulation tests but never created it. This made alice's live credential test impossible. This phase creates both test buckets: the dev-bucket alice should access, and an other-bucket she should not.</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">bash</span>
+        <span class="code-title">create dev-bucket and other-bucket with test objects</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="c-comment"># dev-bucket: alice's policy allows full access to this bucket</span>
+<span class="c-cmd">aws</span> s3 mb s3://dev-bucket-<span class="c-var">${ACCOUNT_ID}</span> <span class="c-flag">--region</span> us-east-1
+
+<span class="c-comment"># Upload a test object alice should be able to read</span>
+<span class="c-cmd">echo</span> <span class="c-string">"iam-lab test object — dev-alice should read this"</span> > test-object.txt
+<span class="c-cmd">aws</span> s3 cp test-object.txt s3://dev-bucket-<span class="c-var">${ACCOUNT_ID}</span>/test-object.txt
+
+<span class="c-comment"># other-bucket: alice's policy does NOT include this ARN — she should be denied</span>
+<span class="c-cmd">aws</span> s3 mb s3://other-bucket-<span class="c-var">${ACCOUNT_ID}</span> <span class="c-flag">--region</span> us-east-1
+
+<span class="c-comment"># Upload an object alice should NOT be able to read</span>
+<span class="c-cmd">echo</span> <span class="c-string">"alice should NOT see this — wrong bucket"</span> > secret-object.txt
+<span class="c-cmd">aws</span> s3 cp secret-object.txt s3://other-bucket-<span class="c-var">${ACCOUNT_ID}</span>/secret-object.txt</pre>
+    </div>
+
+    <div class="verify-block">
+      <div class="verify-header"><span>verify both buckets and objects exist</span></div>
+      <pre><span class="c-cmd">aws</span> s3 ls | <span class="c-cmd">grep</span> -E <span class="c-string">"dev-bucket|other-bucket"</span>
+<span class="c-cmd">aws</span> s3 ls s3://dev-bucket-<span class="c-var">${ACCOUNT_ID}</span>/
+<span class="c-cmd">aws</span> s3 ls s3://other-bucket-<span class="c-var">${ACCOUNT_ID}</span>/</pre>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       PHASE 8 — CLOUDTRAIL
+  ════════════════════════════════════════════ -->
+  <section id="phase8">
+    <div class="phase-header">
+      <div class="phase-icon green">P8</div>
+      <div class="phase-header-text">
+        <div class="phase-num-label">Phase 8</div>
+        <div class="phase-title">Enable CloudTrail <span class="fix-badge">timing fix</span></div>
+      </div>
+    </div>
+
+    <p>CloudTrail records every API call as a JSON event. IAM and STS events include the caller identity, action, resource, and any error code. When bob assumes a role using session name <code>bob-ops-session</code>, that session name appears in every CloudTrail event from that session — making it trivially easy to trace role usage back to an individual user.</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">bash</span>
+        <span class="code-title">create trail bucket, policy, trail, start logging</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="c-keyword">export</span> <span class="c-var">TRAIL_BUCKET</span>=<span class="c-string">"cloudtrail-iam-lab-${ACCOUNT_ID}"</span>
+<span class="c-cmd">aws</span> s3 mb s3://<span class="c-var">$TRAIL_BUCKET</span> <span class="c-flag">--region</span> us-east-1
+
+<span class="c-comment"># CloudTrail requires this exact bucket policy — it will not write without it</span>
+<span class="c-cmd">cat</span> > trail-bucket-policy.json &lt;&lt; EOF
+{
+  <span class="c-string">"Version"</span>: <span class="c-string">"2012-10-17"</span>,
+  <span class="c-string">"Statement"</span>: [
+    {
+      <span class="c-string">"Sid"</span>: <span class="c-string">"AWSCloudTrailAclCheck"</span>,
+      <span class="c-string">"Effect"</span>: <span class="c-string">"Allow"</span>,
+      <span class="c-string">"Principal"</span>: { <span class="c-string">"Service"</span>: <span class="c-string">"cloudtrail.amazonaws.com"</span> },
+      <span class="c-string">"Action"</span>: <span class="c-string">"s3:GetBucketAcl"</span>,
+      <span class="c-string">"Resource"</span>: <span class="c-string">"arn:aws:s3:::${TRAIL_BUCKET}"</span>
+    },
+    {
+      <span class="c-string">"Sid"</span>: <span class="c-string">"AWSCloudTrailWrite"</span>,
+      <span class="c-string">"Effect"</span>: <span class="c-string">"Allow"</span>,
+      <span class="c-string">"Principal"</span>: { <span class="c-string">"Service"</span>: <span class="c-string">"cloudtrail.amazonaws.com"</span> },
+      <span class="c-string">"Action"</span>: <span class="c-string">"s3:PutObject"</span>,
+      <span class="c-string">"Resource"</span>: <span class="c-string">"arn:aws:s3:::${TRAIL_BUCKET}/AWSLogs/${ACCOUNT_ID}/*"</span>,
+      <span class="c-string">"Condition"</span>: {
+        <span class="c-string">"StringEquals"</span>: { <span class="c-string">"s3:x-amz-acl"</span>: <span class="c-string">"bucket-owner-full-control"</span> }
+      }
+    }
+  ]
+}
+EOF
+
+<span class="c-cmd">aws</span> s3api put-bucket-policy \
+  <span class="c-flag">--bucket</span> <span class="c-var">$TRAIL_BUCKET</span> \
+  <span class="c-flag">--policy</span> file://trail-bucket-policy.json
+
+<span class="c-cmd">aws</span> cloudtrail create-trail \
+  <span class="c-flag">--name</span> iam-lab-trail \
+  <span class="c-flag">--s3-bucket-name</span> <span class="c-var">$TRAIL_BUCKET</span> \
+  <span class="c-flag">--is-multi-region-trail</span>
+
+<span class="c-cmd">aws</span> cloudtrail start-logging <span class="c-flag">--name</span> iam-lab-trail</pre>
+    </div>
+
+    <div class="verify-block">
+      <div class="verify-header"><span>confirm trail is active</span></div>
+      <pre><span class="c-cmd">aws</span> cloudtrail get-trail-status \
+  <span class="c-flag">--name</span> iam-lab-trail \
+  <span class="c-flag">--query</span> <span class="c-string">"{Logging:IsLogging,LastDelivery:LatestDeliveryTime}"</span>
+<span class="c-comment"># IsLogging should be true</span></pre>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       RESTORE VARIABLES
+  ════════════════════════════════════════════ -->
+  <section id="restore">
+    <h2><span class="section-num">T0</span> Restore Variables Before Testing</h2>
+
+    <p>If you open a new terminal session or the environment variables were lost, run this block first. All testing commands depend on these four variables.</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">bash</span>
+        <span class="code-title">restore all environment variables</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="c-keyword">export</span> <span class="c-var">ACCOUNT_ID</span>=$(<span class="c-cmd">aws</span> sts get-caller-identity <span class="c-flag">--query</span> Account <span class="c-flag">--output</span> text)
+
+<span class="c-keyword">export</span> <span class="c-var">DEV_S3_POLICY_ARN</span>=$(<span class="c-cmd">aws</span> iam list-policies \
+  <span class="c-flag">--query</span> <span class="c-string">"Policies[?PolicyName=='dev-s3-limited'].Arn"</span> \
+  <span class="c-flag">--output</span> text)
+
+<span class="c-keyword">export</span> <span class="c-var">BOUNDARY_ARN</span>=$(<span class="c-cmd">aws</span> iam list-policies \
+  <span class="c-flag">--query</span> <span class="c-string">"Policies[?PolicyName=='dev-permission-boundary'].Arn"</span> \
+  <span class="c-flag">--output</span> text)
+
+<span class="c-keyword">export</span> <span class="c-var">TRAIL_BUCKET</span>=<span class="c-string">"cloudtrail-iam-lab-${ACCOUNT_ID}"</span>
+
+<span class="c-cmd">echo</span> <span class="c-string">"ACCOUNT_ID:        $ACCOUNT_ID"</span>
+<span class="c-cmd">echo</span> <span class="c-string">"DEV_S3_POLICY_ARN: $DEV_S3_POLICY_ARN"</span>
+<span class="c-cmd">echo</span> <span class="c-string">"BOUNDARY_ARN:      $BOUNDARY_ARN"</span>
+<span class="c-cmd">echo</span> <span class="c-string">"TRAIL_BUCKET:      $TRAIL_BUCKET"</span></pre>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       TEST 1 — SIMULATE ALICE
+  ════════════════════════════════════════════ -->
+  <section id="test1">
+    <h2><span class="section-num">T1</span> Simulate alice — Policy Correctness <span class="fix-badge">fix</span></h2>
+
+    <p>Simulation validates that the policy documents are logically correct. It tests the IAM evaluation engine without making real API calls to services. Run this first — if simulation results are wrong, fix the policy before testing with live credentials.</p>
+
+    <div class="errata">
+      <span class="errata-label">v1 bug</span>
+      <span>v1 simulation used --resource-arns "*" for resource-scoped actions, which gives imprecise results. All simulations now use correct ARN formats. v1 also never tested alice against other-bucket to verify resource scoping. Both are fixed here.</span>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">bash</span>
+        <span class="code-title">simulate alice — S3 allow, IAM deny (boundary), billing deny, other-bucket deny</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="c-comment"># Test 1a: S3 access on dev-bucket (her allowed resource)</span>
+<span class="c-cmd">aws</span> iam simulate-principal-policy \
+  <span class="c-flag">--policy-source-arn</span> <span class="c-string">"arn:aws:iam::${ACCOUNT_ID}:user/dev-alice"</span> \
+  <span class="c-flag">--action-names</span> <span class="c-string">"s3:GetObject"</span> <span class="c-string">"s3:PutObject"</span> <span class="c-string">"s3:DeleteObject"</span> \
+  <span class="c-flag">--resource-arns</span> <span class="c-string">"arn:aws:s3:::dev-bucket-${ACCOUNT_ID}/test-object.txt"</span> \
+  <span class="c-flag">--query</span> <span class="c-string">"EvaluationResults[*].{Action:EvalActionName,Decision:EvalDecision}"</span> \
+  <span class="c-flag">--output</span> table
+
+<span class="c-comment"># Test 1b: S3 access on other-bucket (NOT in policy resource ARN)</span>
+<span class="c-cmd">aws</span> iam simulate-principal-policy \
+  <span class="c-flag">--policy-source-arn</span> <span class="c-string">"arn:aws:iam::${ACCOUNT_ID}:user/dev-alice"</span> \
+  <span class="c-flag">--action-names</span> <span class="c-string">"s3:GetObject"</span> <span class="c-string">"s3:ListBucket"</span> \
+  <span class="c-flag">--resource-arns</span> <span class="c-string">"arn:aws:s3:::other-bucket-${ACCOUNT_ID}/secret-object.txt"</span> \
+  <span class="c-flag">--query</span> <span class="c-string">"EvaluationResults[*].{Action:EvalActionName,Decision:EvalDecision}"</span> \
+  <span class="c-flag">--output</span> table
+
+<span class="c-comment"># Test 1c: IAM and billing — blocked by boundary even though no explicit deny</span>
+<span class="c-cmd">aws</span> iam simulate-principal-policy \
+  <span class="c-flag">--policy-source-arn</span> <span class="c-string">"arn:aws:iam::${ACCOUNT_ID}:user/dev-alice"</span> \
+  <span class="c-flag">--action-names</span> <span class="c-string">"iam:CreateUser"</span> <span class="c-string">"iam:ListUsers"</span> <span class="c-string">"budgets:ViewBudget"</span> \
+  <span class="c-flag">--resource-arns</span> <span class="c-string">"arn:aws:iam::${ACCOUNT_ID}:user/*"</span> \
+  <span class="c-flag">--query</span> <span class="c-string">"EvaluationResults[*].{Action:EvalActionName,Decision:EvalDecision,Reason:MissingContextValues}"</span> \
+  <span class="c-flag">--output</span> table</pre>
+    </div>
+
+    <div style="margin: 12px 0;">
+      <div class="test-result allow"><span class="result-badge">ALLOW</span><span class="result-text">s3:GetObject on dev-bucket <span class="why">→ managed policy allows it, boundary permits S3, resource matches</span></span></div>
+      <div class="test-result deny"><span class="result-badge">DENY</span><span class="result-text">s3:GetObject on other-bucket <span class="why">→ policy only lists dev-bucket ARNs, other-bucket is not in Resource</span></span></div>
+      <div class="test-result deny"><span class="result-badge">DENY</span><span class="result-text">iam:CreateUser <span class="why">→ boundary explicitly denies iam:* — no identity policy can override a boundary deny</span></span></div>
+      <div class="test-result deny"><span class="result-badge">DENY</span><span class="result-text">budgets:ViewBudget <span class="why">→ managed policy DenyBilling statement + boundary deny on budgets:*</span></span></div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       TEST 2 — ALICE LIVE CREDENTIALS
+  ════════════════════════════════════════════ -->
+  <section id="test2">
+    <h2><span class="section-num">T2</span> alice Live Credential Test <span class="fix-badge">new</span></h2>
+
+    <p>Simulation confirmed the policy is logically correct. Now confirm that alice's actual credentials enforce the same boundaries at runtime against real resources. This is the test that was completely absent in v1.</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">bash</span>
+        <span class="code-title">alice live — dev-bucket access, other-bucket denied, IAM denied</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="c-comment"># Confirm we're acting as alice</span>
+<span class="c-cmd">aws</span> sts get-caller-identity <span class="c-flag">--profile</span> alice
+<span class="c-comment"># UserId should show dev-alice</span>
+
+<span class="c-comment"># ── SHOULD WORK ──────────────────────────────────────────────</span>
+
+<span class="c-comment"># List all buckets (ListAllMyBuckets allowed in policy)</span>
+<span class="c-cmd">aws</span> s3 ls <span class="c-flag">--profile</span> alice
+
+<span class="c-comment"># Read from dev-bucket (GetObject allowed)</span>
+<span class="c-cmd">aws</span> s3 cp s3://dev-bucket-<span class="c-var">${ACCOUNT_ID}</span>/test-object.txt - <span class="c-flag">--profile</span> alice
+<span class="c-comment"># Prints: "iam-lab test object — dev-alice should read this"</span>
+
+<span class="c-comment"># Write to dev-bucket (PutObject allowed)</span>
+<span class="c-cmd">echo</span> <span class="c-string">"alice write test"</span> | <span class="c-cmd">aws</span> s3 cp - s3://dev-bucket-<span class="c-var">${ACCOUNT_ID}</span>/alice-write.txt <span class="c-flag">--profile</span> alice
+<span class="c-comment"># Expected: upload success</span>
+
+<span class="c-comment"># List dev-bucket contents (ListBucket allowed)</span>
+<span class="c-cmd">aws</span> s3 ls s3://dev-bucket-<span class="c-var">${ACCOUNT_ID}</span>/ <span class="c-flag">--profile</span> alice
+
+<span class="c-comment"># ── SHOULD FAIL ───────────────────────────────────────────────</span>
+
+<span class="c-comment"># Read from other-bucket — resource scoping enforced</span>
+<span class="c-cmd">aws</span> s3 cp s3://other-bucket-<span class="c-var">${ACCOUNT_ID}</span>/secret-object.txt - <span class="c-flag">--profile</span> alice
+<span class="c-comment"># Expected: AccessDenied (other-bucket not in policy Resource ARN)</span>
+
+<span class="c-comment"># List other-bucket — same reason</span>
+<span class="c-cmd">aws</span> s3 ls s3://other-bucket-<span class="c-var">${ACCOUNT_ID}</span>/ <span class="c-flag">--profile</span> alice
+<span class="c-comment"># Expected: AccessDenied</span>
+
+<span class="c-comment"># IAM action — boundary denies iam:* regardless of identity policy</span>
+<span class="c-cmd">aws</span> iam list-users <span class="c-flag">--profile</span> alice
+<span class="c-comment"># Expected: AccessDenied (boundary denial)</span>
+
+<span class="c-comment"># Billing — explicit deny in managed policy AND boundary</span>
+<span class="c-cmd">aws</span> budgets describe-budgets <span class="c-flag">--account-id</span> <span class="c-var">$ACCOUNT_ID</span> <span class="c-flag">--profile</span> alice
+<span class="c-comment"># Expected: AccessDenied</span></pre>
+    </div>
+
+    <div class="callout warning">
+      <div class="callout-title">Why budgets:* instead of ce:GetCostAndUsage</div>
+      <p>v1 used <code>aws ce get-cost-and-usage</code> to test billing denial. The problem: Cost Explorer must be enabled separately in the AWS account under Billing preferences. If it's not enabled, the API returns a service error (not an IAM AccessDenied), which looks like the test failed for the wrong reason. <code>budgets:describe-budgets</code> is part of the same DenyBilling statement and does not need explicit service enablement.</p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       TEST 4 — BOB ZERO → EC2
+  ════════════════════════════════════════════ -->
+  <section id="test4">
+    <h2><span class="section-num">T4</span> ops-bob: Zero Direct Access → Assume ops-role → EC2 <span class="fix-badge">fix</span></h2>
+
+    <p>The key demonstration for the ops-team pattern. Bob is denied at every AWS service call until he assumes the role. Then EC2 describe works. Destructive EC2 actions remain denied via the explicit deny in the role's inline policy.</p>
+
+    <div class="errata">
+      <span class="errata-label">v1 bug</span>
+      <span>v1 used i-fake123 as the test instance ID. EC2 validates instance ID format before calling IAM — i-fake123 fails format validation (InvalidInstanceID.Malformed) before IAM evaluates the policy, so the test returned the wrong error. Fixed: i-1234567890abcdef0 is a valid format. EC2 will return InvalidInstanceID.NotFound (the instance doesn't exist in your account), but that error comes after IAM evaluation — you're testing IAM, not EC2 inventory.</span>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">bash</span>
+        <span class="code-title">bob zero-access proof → assume ops-role → EC2 works, terminate blocked</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="c-comment"># Step 1: prove bob has absolutely nothing without the role</span>
+<span class="c-cmd">aws</span> ec2 describe-instances <span class="c-flag">--profile</span> bob <span class="c-flag">--region</span> us-east-1
+<span class="c-comment"># Expected: AccessDenied — group only has sts:AssumeRole, no EC2 permissions</span>
+
+<span class="c-cmd">aws</span> s3 ls <span class="c-flag">--profile</span> bob
+<span class="c-comment"># Expected: AccessDenied — not even S3 list</span>
+
+<span class="c-comment"># Step 2: bob exchanges his user credentials for role credentials</span>
+<span class="c-cmd">read</span> -r <span class="c-var">AWS_ACCESS_KEY_ID</span> <span class="c-var">AWS_SECRET_ACCESS_KEY</span> <span class="c-var">AWS_SESSION_TOKEN</span> &lt;&lt;(
+  <span class="c-cmd">aws</span> sts assume-role \
+    <span class="c-flag">--role-arn</span> <span class="c-string">"arn:aws:iam::${ACCOUNT_ID}:role/ops-role"</span> \
+    <span class="c-flag">--role-session-name</span> bob-ops-session \
+    <span class="c-flag">--profile</span> bob \
+    <span class="c-flag">--query</span> <span class="c-string">"Credentials.[AccessKeyId,SecretAccessKey,SessionToken]"</span> \
+    <span class="c-flag">--output</span> text
+)
+<span class="c-keyword">export</span> <span class="c-var">AWS_ACCESS_KEY_ID</span> <span class="c-var">AWS_SECRET_ACCESS_KEY</span> <span class="c-var">AWS_SESSION_TOKEN</span>
+
+<span class="c-comment"># Confirm identity changed to the role session</span>
+<span class="c-cmd">aws</span> sts get-caller-identity
+<span class="c-comment"># UserId: assumed-role/ops-role/bob-ops-session</span>
+
+<span class="c-comment"># Step 3: EC2 describe now works (role has ec2:Describe*)</span>
+<span class="c-cmd">aws</span> ec2 describe-instances <span class="c-flag">--region</span> us-east-1
+<span class="c-comment"># Expected: returns instance list (may be empty if no instances in account)</span>
+
+<span class="c-cmd">aws</span> ec2 describe-security-groups <span class="c-flag">--region</span> us-east-1
+<span class="c-comment"># Expected: returns security groups</span>
+
+<span class="c-comment"># Step 4: destructive actions blocked by explicit Deny in ops-ec2-inline</span>
+<span class="c-comment"># i-1234567890abcdef0 is valid format — EC2 evaluates IAM before returning NotFound</span>
+<span class="c-cmd">aws</span> ec2 terminate-instances \
+  <span class="c-flag">--instance-ids</span> i-1234567890abcdef0 \
+  <span class="c-flag">--region</span> us-east-1
+<span class="c-comment"># Expected: AccessDenied (explicit deny in role policy)</span>
+
+<span class="c-comment"># Step 5: S3 still blocked — role has no S3 permissions</span>
+<span class="c-cmd">aws</span> s3 ls
+<span class="c-comment"># Expected: AccessDenied</span>
+
+<span class="c-keyword">unset</span> <span class="c-var">AWS_ACCESS_KEY_ID</span> <span class="c-var">AWS_SECRET_ACCESS_KEY</span> <span class="c-var">AWS_SESSION_TOKEN</span></pre>
+    </div>
+
+    <div style="margin: 12px 0;">
+      <div class="test-result deny"><span class="result-badge">DENY</span><span class="result-text">ec2:DescribeInstances with bob's user creds <span class="why">→ group has zero direct permissions, only sts:AssumeRole</span></span></div>
+      <div class="test-result allow"><span class="result-badge">ALLOW</span><span class="result-text">ec2:DescribeInstances with role creds <span class="why">→ ops-role inline policy allows ec2:Describe*</span></span></div>
+      <div class="test-result deny"><span class="result-badge">DENY</span><span class="result-text">ec2:TerminateInstances with role creds <span class="why">→ explicit Deny in ops-ec2-inline — Deny always wins</span></span></div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       TEST 5 — CAROL SESSION POLICY
+  ════════════════════════════════════════════ -->
+  <section id="test5">
+    <h2><span class="section-num">T5</span> readonly-carol: AssumeRole + Session Policy Narrowing</h2>
+
+    <div class="callout concept">
+      <div class="callout-title">Session policy mechanics</div>
+      <p><code>readonly-role</code> has AWS-managed <code>ReadOnlyAccess</code> — this allows EC2, RDS, CloudWatch, S3, and every other read action. When carol calls <code>AssumeRole</code> she passes a session policy allowing only <code>s3:Get*</code> and <code>s3:List*</code>. Effective permissions = role policy ∩ session policy. EC2 reads are denied because the session policy doesn't include EC2 — even though the role allows them. A session policy can only restrict, never expand beyond what the role allows.</p>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">bash</span>
+        <span class="code-title">carol-session-policy.json + assume with session policy injected</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="c-comment"># Session policy — written at call-time, narrows what carol gets from the role</span>
+<span class="c-cmd">cat</span> > carol-session-policy.json &lt;&lt; <span class="c-string">'EOF'</span>
+{
+  <span class="c-string">"Version"</span>: <span class="c-string">"2012-10-17"</span>,
+  <span class="c-string">"Statement"</span>: [{
+    <span class="c-string">"Effect"</span>: <span class="c-string">"Allow"</span>,
+    <span class="c-string">"Action"</span>: [<span class="c-string">"s3:Get*"</span>, <span class="c-string">"s3:List*"</span>],
+    <span class="c-string">"Resource"</span>: <span class="c-string">"*"</span>
+  }]
+}
+EOF
+
+<span class="c-comment"># Assume role AND pass session policy in the same call</span>
+<span class="c-cmd">read</span> -r <span class="c-var">AWS_ACCESS_KEY_ID</span> <span class="c-var">AWS_SECRET_ACCESS_KEY</span> <span class="c-var">AWS_SESSION_TOKEN</span> &lt;&lt;(
+  <span class="c-cmd">aws</span> sts assume-role \
+    <span class="c-flag">--role-arn</span> <span class="c-string">"arn:aws:iam::${ACCOUNT_ID}:role/readonly-role"</span> \
+    <span class="c-flag">--role-session-name</span> carol-readonly-session \
+    <span class="c-flag">--policy</span> file://carol-session-policy.json \
+    <span class="c-flag">--duration-seconds</span> 900 \
+    <span class="c-flag">--profile</span> carol \
+    <span class="c-flag">--query</span> <span class="c-string">"Credentials.[AccessKeyId,SecretAccessKey,SessionToken]"</span> \
+    <span class="c-flag">--output</span> text
+)
+<span class="c-keyword">export</span> <span class="c-var">AWS_ACCESS_KEY_ID</span> <span class="c-var">AWS_SECRET_ACCESS_KEY</span> <span class="c-var">AWS_SESSION_TOKEN</span>
+
+<span class="c-comment"># Confirm identity shows carol's role session</span>
+<span class="c-cmd">aws</span> sts get-caller-identity
+<span class="c-comment"># UserId: assumed-role/readonly-role/carol-readonly-session</span>
+
+<span class="c-comment"># S3 reads work — both role AND session policy allow them</span>
+<span class="c-cmd">aws</span> s3 ls
+<span class="c-cmd">aws</span> s3 cp s3://dev-bucket-<span class="c-var">${ACCOUNT_ID}</span>/test-object.txt -
+<span class="c-comment"># Expected: success — session policy allows s3:Get*</span>
+
+<span class="c-comment"># EC2 reads blocked — role allows them but session policy omits EC2</span>
+<span class="c-cmd">aws</span> ec2 describe-instances <span class="c-flag">--region</span> us-east-1
+<span class="c-comment"># Expected: AccessDenied — role allows, session doesn't include EC2 → intersection = deny</span>
+
+<span class="c-comment"># S3 writes blocked — session policy only has Get*/List*, no Put*</span>
+<span class="c-cmd">echo</span> <span class="c-string">"carol write attempt"</span> | <span class="c-cmd">aws</span> s3 cp - s3://dev-bucket-<span class="c-var">${ACCOUNT_ID}</span>/carol-write.txt
+<span class="c-comment"># Expected: AccessDenied</span>
+
+<span class="c-keyword">unset</span> <span class="c-var">AWS_ACCESS_KEY_ID</span> <span class="c-var">AWS_SECRET_ACCESS_KEY</span> <span class="c-var">AWS_SESSION_TOKEN</span></pre>
+    </div>
+
+    <div style="margin: 12px 0;">
+      <div class="test-result allow"><span class="result-badge">ALLOW</span><span class="result-text">s3:ListAllMyBuckets <span class="why">→ role allows (ReadOnlyAccess), session allows (s3:List*) — intersection = allow</span></span></div>
+      <div class="test-result deny"><span class="result-badge">DENY</span><span class="result-text">ec2:DescribeInstances <span class="why">→ role allows (ReadOnlyAccess), session does NOT include EC2 — intersection = deny</span></span></div>
+      <div class="test-result deny"><span class="result-badge">DENY</span><span class="result-text">s3:PutObject <span class="why">→ session policy only lists Get*/List* — Put* not in session = deny</span></span></div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       TEST 6 — BOUNDARY ESCALATION
+  ════════════════════════════════════════════ -->
+  <section id="test6">
+    <h2><span class="section-num">T6</span> Boundary Blocks Privilege Escalation <span class="fix-badge">fix</span></h2>
+
+    <p>Simulate a misconfiguration: someone accidentally attaches <code>AdministratorAccess</code> directly to alice. The permission boundary should make this a non-event — alice still cannot call IAM actions.</p>
+
+    <div class="errata">
+      <span class="errata-label">v1 bug</span>
+      <span>v1 ran only simulation for this test and immediately cleaned up, giving no chance to verify the boundary works with live credentials. This version adds a live call after simulation to confirm the runtime enforcement matches the predicted simulation result.</span>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">bash</span>
+        <span class="code-title">attach AdministratorAccess → simulate → live call → confirm boundary wins</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="c-comment"># Attach AdministratorAccess to alice directly (simulating misconfiguration)</span>
+<span class="c-cmd">aws</span> iam attach-user-policy \
+  <span class="c-flag">--user-name</span> dev-alice \
+  <span class="c-flag">--policy-arn</span> arn:aws:iam::aws:policy/AdministratorAccess
+
+<span class="c-comment"># Step 1: simulate — boundary should still deny IAM actions</span>
+<span class="c-cmd">aws</span> iam simulate-principal-policy \
+  <span class="c-flag">--policy-source-arn</span> <span class="c-string">"arn:aws:iam::${ACCOUNT_ID}:user/dev-alice"</span> \
+  <span class="c-flag">--action-names</span> <span class="c-string">"iam:CreateUser"</span> <span class="c-string">"iam:DeleteUser"</span> <span class="c-string">"iam:CreatePolicy"</span> <span class="c-string">"iam:AttachUserPolicy"</span> \
+  <span class="c-flag">--resource-arns</span> <span class="c-string">"arn:aws:iam::${ACCOUNT_ID}:user/*"</span> \
+  <span class="c-flag">--query</span> <span class="c-string">"EvaluationResults[*].{Action:EvalActionName,Decision:EvalDecision}"</span> \
+  <span class="c-flag">--output</span> table
+<span class="c-comment"># All four → implicitDeny — AdministratorAccess means nothing outside the boundary</span>
+
+<span class="c-comment"># Step 2: live call — confirm runtime matches simulation</span>
+<span class="c-cmd">aws</span> iam list-users <span class="c-flag">--profile</span> alice
+<span class="c-comment"># Expected: AccessDenied — boundary denies iam:* at runtime too</span>
+
+<span class="c-comment"># S3 still works (boundary allows s3:*)</span>
+<span class="c-cmd">aws</span> s3 ls <span class="c-flag">--profile</span> alice
+<span class="c-comment"># Expected: lists buckets</span>
+
+<span class="c-comment"># Step 3: clean up the misconfiguration</span>
+<span class="c-cmd">aws</span> iam detach-user-policy \
+  <span class="c-flag">--user-name</span> dev-alice \
+  <span class="c-flag">--policy-arn</span> arn:aws:iam::aws:policy/AdministratorAccess</pre>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       TEST 7 — POLICY SIMULATOR UI
+  ════════════════════════════════════════════ -->
+  <section id="test7">
+    <h2><span class="section-num">T7</span> IAM Policy Simulator UI — Console Step</h2>
+
+    <div class="callout test">
+      <div class="callout-title">Console — one step only</div>
+      <p>Navigate to <strong>https://policysim.aws.amazon.com</strong>. Select <code>dev-alice</code> as the principal, choose <strong>IAM</strong> as the service, add action <code>iam:CreateUser</code>, set resource to <code>arn:aws:iam::ACCOUNT_ID:user/*</code>, and run. The UI shows exactly which policy statement caused the deny and labels whether it was the identity policy or the permission boundary — this traceability is much cleaner than the CLI output when debugging multi-policy interactions and is the one thing the console does better than the CLI for this lab.</p>
+    </div>
+
+    <p>Also try: select <code>dev-alice</code>, choose S3, add <code>s3:GetObject</code>, set resource to <code>other-bucket-ACCOUNT_ID/*</code>, run. The result is deny — and the simulator will show it came from the absence of a matching Allow statement, not from an explicit Deny. That distinction matters in production debugging.</p>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       TEST 8 — CLOUDTRAIL
+  ════════════════════════════════════════════ -->
+  <section id="test8">
+    <h2><span class="section-num">T8</span> CloudTrail Audit <span class="fix-badge">timing fix</span></h2>
+
+    <div class="errata">
+      <span class="errata-label">v1 bug</span>
+      <span>v1 said "wait ~5 minutes." CloudTrail's lookup-events API shows events within 15 minutes of occurrence for management events. Plan for up to 15 minutes. The S3-based log files take even longer and require manual download to parse.</span>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">bash</span>
+        <span class="code-title">query CloudTrail — wait up to 15 min after running tests</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="c-comment"># All events from dev-alice (direct calls using her user credentials)</span>
+<span class="c-cmd">aws</span> cloudtrail lookup-events \
+  <span class="c-flag">--lookup-attributes</span> AttributeKey=Username,AttributeValue=dev-alice \
+  <span class="c-flag">--max-results</span> 20 \
+  <span class="c-flag">--query</span> <span class="c-string">"Events[*].{Time:EventTime,Event:EventName,Source:EventSource}"</span> \
+  <span class="c-flag">--output</span> table
+
+<span class="c-comment"># AssumeRole events — shows when bob and carol assumed their roles</span>
+<span class="c-comment"># alice does not appear here — developers group has no sts:AssumeRole permission</span>
+<span class="c-cmd">aws</span> cloudtrail lookup-events \
+  <span class="c-flag">--lookup-attributes</span> AttributeKey=EventName,AttributeValue=AssumeRole \
+  <span class="c-flag">--max-results</span> 20 \
+  <span class="c-flag">--query</span> <span class="c-string">"Events[*].{Time:EventTime,User:Username,Event:EventName}"</span> \
+  <span class="c-flag">--output</span> table
+
+<span class="c-comment"># EC2 events from bob's session — session name is the username in CloudTrail</span>
+<span class="c-cmd">aws</span> cloudtrail lookup-events \
+  <span class="c-flag">--lookup-attributes</span> AttributeKey=Username,AttributeValue=bob-ops-session \
+  <span class="c-flag">--max-results</span> 20 \
+  <span class="c-flag">--query</span> <span class="c-string">"Events[*].{Time:EventTime,Event:EventName,Error:ErrorCode}"</span> \
+  <span class="c-flag">--output</span> table
+
+<span class="c-comment"># Carol's session events — should show S3 gets and EC2 AccessDenied</span>
+<span class="c-cmd">aws</span> cloudtrail lookup-events \
+  <span class="c-flag">--lookup-attributes</span> AttributeKey=Username,AttributeValue=carol-readonly-session \
+  <span class="c-flag">--max-results</span> 20 \
+  <span class="c-flag">--query</span> <span class="c-string">"Events[*].{Time:EventTime,Event:EventName,Error:ErrorCode}"</span> \
+  <span class="c-flag">--output</span> table</pre>
+    </div>
+
+    <div class="callout key">
+      <div class="callout-title">CloudTrail audit key insight</div>
+      <p>Notice that when bob ran EC2 commands, the CloudTrail <code>Username</code> field shows <code>bob-ops-session</code> — the session name from the <code>--role-session-name</code> flag. This is how you trace role usage back to a specific individual in an audit. Without meaningful session names, you'd only know the role was assumed — not by whom or why. This is why session naming conventions matter in production.</p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       CONCEPTS SUMMARY
+  ════════════════════════════════════════════ -->
+  <section id="concepts">
+    <h2><span class="section-num">CS</span> Concepts Summary</h2>
+
+    <div class="matrix matrix-5">
+      <div class="matrix-header">
+        <div class="matrix-cell">Concept</div>
+        <div class="matrix-cell">Demonstrated by</div>
+        <div class="matrix-cell">Key rule</div>
+        <div class="matrix-cell">What breaks without it</div>
+        <div class="matrix-cell">Verified in</div>
+      </div>
+      <div class="matrix-row">
+        <div class="matrix-cell">Least privilege</div>
+        <div class="matrix-cell">All groups</div>
+        <div class="matrix-cell">Grant minimum required. Use explicit Deny for critical exclusions</div>
+        <div class="matrix-cell">Users can access services not needed for their job</div>
+        <div class="matrix-cell">T1, T2</div>
+      </div>
+      <div class="matrix-row">
+        <div class="matrix-cell">RBAC</div>
+        <div class="matrix-cell">developers group</div>
+        <div class="matrix-cell">Policies on groups not users. User inherits through membership</div>
+        <div class="matrix-cell">Permission sprawl — individual user policies don't scale</div>
+        <div class="matrix-cell">T1, T2</div>
+      </div>
+      <div class="matrix-row">
+        <div class="matrix-cell">Resource scoping</div>
+        <div class="matrix-cell">dev-bucket vs other-bucket</div>
+        <div class="matrix-cell">Policy Resource ARN must match the actual resource being accessed</div>
+        <div class="matrix-cell">Users access any bucket, not just their assigned one</div>
+        <div class="matrix-cell">T1b, T2</div>
+      </div>
+      <div class="matrix-row">
+        <div class="matrix-cell">STS assume role</div>
+        <div class="matrix-cell">ops-bob → ops-role<br>readonly-carol → readonly-role</div>
+        <div class="matrix-cell">Exchange long-lived creds for short-lived scoped creds. Trust policy + identity policy both required</div>
+        <div class="matrix-cell">Long-lived credentials with broad access — harder to rotate, harder to audit</div>
+        <div class="matrix-cell">T4, T5</div>
+      </div>
+      <div class="matrix-row">
+        <div class="matrix-cell">Session policies</div>
+        <div class="matrix-cell">readonly-carol</div>
+        <div class="matrix-cell">Effective = role ∩ session. Session policy can only restrict, never expand</div>
+        <div class="matrix-cell">All callers of same role get identical permissions regardless of context</div>
+        <div class="matrix-cell">T5</div>
+      </div>
+      <div class="matrix-row">
+        <div class="matrix-cell">Permission boundaries</div>
+        <div class="matrix-cell">dev-alice + boundary</div>
+        <div class="matrix-cell">Identity policy AND boundary must both allow. Boundary caps max permissions</div>
+        <div class="matrix-cell">Misconfigured identity policies cause privilege escalation</div>
+        <div class="matrix-cell">T1c, T6</div>
+      </div>
+      <div class="matrix-row">
+        <div class="matrix-cell">Audit trail</div>
+        <div class="matrix-cell">CloudTrail + session names</div>
+        <div class="matrix-cell">Session name in AssumeRole maps assumed-role actions to individual user in logs</div>
+        <div class="matrix-cell">Can't trace who used a shared role or when</div>
+        <div class="matrix-cell">T8</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       CLEANUP
+  ════════════════════════════════════════════ -->
+  <section id="cleanup">
+    <h2><span class="section-num">CL</span> Cleanup</h2>
+    <p>Run the restore block first if in a new session. Then run in order — dependencies must be removed before parent resources can be deleted.</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">bash</span>
+        <span class="code-title">full cleanup — all resources in dependency order</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="c-comment"># ── 1. Detach and delete group policies ───────────────────────</span>
+<span class="c-cmd">aws</span> iam detach-group-policy <span class="c-flag">--group-name</span> developers \
+  <span class="c-flag">--policy-arn</span> <span class="c-var">$DEV_S3_POLICY_ARN</span>
+<span class="c-comment"># developers has no inline policies in v3 — no allow-assume-dev-s3-role to delete</span>
+<span class="c-cmd">aws</span> iam delete-group-policy <span class="c-flag">--group-name</span> ops-team \
+  <span class="c-flag">--policy-name</span> allow-assume-ops-role
+<span class="c-cmd">aws</span> iam delete-group-policy <span class="c-flag">--group-name</span> readonly-team \
+  <span class="c-flag">--policy-name</span> allow-assume-readonly-role
+
+<span class="c-comment"># ── 2. Remove users from groups, delete keys and users ────────</span>
+<span class="c-keyword">for</span> USER <span class="c-keyword">in</span> dev-alice ops-bob readonly-carol; <span class="c-keyword">do</span>
+  <span class="c-keyword">for</span> GROUP <span class="c-keyword">in</span> developers ops-team readonly-team; <span class="c-keyword">do</span>
+    <span class="c-cmd">aws</span> iam remove-user-from-group \
+      <span class="c-flag">--user-name</span> <span class="c-var">$USER</span> <span class="c-flag">--group-name</span> <span class="c-var">$GROUP</span> 2>/dev/null || true
+  <span class="c-keyword">done</span>
+  KEY=$(<span class="c-cmd">aws</span> iam list-access-keys <span class="c-flag">--user-name</span> <span class="c-var">$USER</span> \
+    <span class="c-flag">--query</span> <span class="c-string">"AccessKeyMetadata[0].AccessKeyId"</span> \
+    <span class="c-flag">--output</span> text 2>/dev/null)
+  [ <span class="c-string">"$KEY"</span> != <span class="c-string">"None"</span> ] <span class="c-keyword">&&</span> <span class="c-cmd">aws</span> iam delete-access-key \
+    <span class="c-flag">--user-name</span> <span class="c-var">$USER</span> <span class="c-flag">--access-key-id</span> <span class="c-var">$KEY</span> 2>/dev/null || true
+  <span class="c-cmd">aws</span> iam delete-user-permissions-boundary \
+    <span class="c-flag">--user-name</span> <span class="c-var">$USER</span> 2>/dev/null || true
+  <span class="c-cmd">aws</span> iam delete-user <span class="c-flag">--user-name</span> <span class="c-var">$USER</span>
+<span class="c-keyword">done</span>
+
+<span class="c-comment"># ── 3. Delete groups ──────────────────────────────────────────</span>
+<span class="c-cmd">aws</span> iam delete-group <span class="c-flag">--group-name</span> developers
+<span class="c-cmd">aws</span> iam delete-group <span class="c-flag">--group-name</span> ops-team
+<span class="c-cmd">aws</span> iam delete-group <span class="c-flag">--group-name</span> readonly-team
+
+<span class="c-comment"># ── 4. Detach role policies and delete roles ──────────────────</span>
+<span class="c-comment"># dev-s3-role does not exist in v3 — skip</span>
+<span class="c-cmd">aws</span> iam delete-role-policy \
+  <span class="c-flag">--role-name</span> ops-role <span class="c-flag">--policy-name</span> ops-ec2-inline
+<span class="c-cmd">aws</span> iam delete-role <span class="c-flag">--role-name</span> ops-role
+
+<span class="c-cmd">aws</span> iam detach-role-policy \
+  <span class="c-flag">--role-name</span> readonly-role \
+  <span class="c-flag">--policy-arn</span> arn:aws:iam::aws:policy/ReadOnlyAccess
+<span class="c-cmd">aws</span> iam delete-role <span class="c-flag">--role-name</span> readonly-role
+
+<span class="c-comment"># ── 5. Delete custom policies ─────────────────────────────────</span>
+<span class="c-cmd">aws</span> iam delete-policy <span class="c-flag">--policy-arn</span> <span class="c-var">$DEV_S3_POLICY_ARN</span>
+<span class="c-cmd">aws</span> iam delete-policy <span class="c-flag">--policy-arn</span> <span class="c-var">$BOUNDARY_ARN</span>
+
+<span class="c-comment"># ── 6. Delete test buckets ─────────────────────────────────────</span>
+<span class="c-cmd">aws</span> s3 rb s3://dev-bucket-<span class="c-var">${ACCOUNT_ID}</span> <span class="c-flag">--force</span>
+<span class="c-cmd">aws</span> s3 rb s3://other-bucket-<span class="c-var">${ACCOUNT_ID}</span> <span class="c-flag">--force</span>
+
+<span class="c-comment"># ── 7. Stop trail and delete trail bucket ─────────────────────</span>
+<span class="c-cmd">aws</span> cloudtrail stop-logging <span class="c-flag">--name</span> iam-lab-trail
+<span class="c-cmd">aws</span> cloudtrail delete-trail <span class="c-flag">--name</span> iam-lab-trail
+<span class="c-cmd">aws</span> s3 rb s3://<span class="c-var">$TRAIL_BUCKET</span> <span class="c-flag">--force</span>
+
+<span class="c-cmd">echo</span> <span class="c-string">"Cleanup complete. Verify with: aws iam list-roles --query 'Roles[?contains(\`ops-role readonly-role\`, RoleName)]'"</span></pre>
+    </div>
+  </section>
+
+</main>
+
+<script>
+function toggleCheck(el) {
+  el.classList.toggle('checked');
+}
+
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  const text = pre.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'copied!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'copy';
+      btn.classList.remove('copied');
+    }, 1800);
+  });
+}
+
+// Active nav highlighting on scroll
+const targets = document.querySelectorAll('section[id], h2[id], h3[id]');
+const links = document.querySelectorAll('nav a');
+
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      links.forEach(l => l.classList.remove('active'));
+      const a = document.querySelector(`nav a[href="#${e.target.id}"]`);
+      if (a) a.classList.add('active');
+    }
+  });
+}, { rootMargin: '-15% 0px -75% 0px' });
+
+targets.forEach(t => obs.observe(t));
+</script>
+</body>
+</html>
